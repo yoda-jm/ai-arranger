@@ -13,6 +13,7 @@ analyze.py (uses W/bars.json and W/stems/*.wav). A "real bar" below = 2 tracker 
   partscope.py W glide STEM T0 T1 [--notes E2,F2,G2,A2,..]     fine bins (FFT 8192) every 23 ms: slide vs pluck, E vs F
   partscope.py W profile STEM lab:BAR,BAR lab:BAR,...          pitch-class profile of groups of bars (chord check)
   partscope.py W notes16 STEM E3,B2,C#3,.. BAR [BAR...]       each note's level per 16th + '+' attacks (arpeggios, walks)
+  partscope.py W picked STEM NBARS --passes 16,40,86            a PICKED (busy) part: lowest note started per 16th, every pass + consensus
 
 How to read them (details and the mistakes they prevent: references/transcription.md):
 - lowest/stack: first pass, what the line is. stack = compare every pass of a section: same figure = the pattern,
@@ -26,6 +27,11 @@ How to read them (details and the mistakes they prevent: references/transcriptio
   flat line (control). FFT 2048 cannot separate adjacent semitones below ~150 Hz (A2/A#2/B2 share a bin): use
   notes16 (FFT 4096) for chromatic lines and check that the columns differ.
 - glide: a slide shows the energy moving bin to bin (G2 -> G#2 -> A2 in ~0.1 s) with no new attack.
+- picked: when the player picks the part continuously (a chorus in 16ths), the other tables come out far too thin.
+  This one reads every note start (basic-pitch) and keeps what most passes agree on. Write the consensus.
+  BUT first rule out a STRUM: a 16th strum also starts notes on every 16th, and its "lowest note" hops between
+  the chord's strings (a C# or G# between A roots), which reads as a fake busy line. If the low strings and the
+  high strings attack together, it is a strum: write the chord's bottom notes in its pulse instead.
 - notes16: a whole figure per 16th (the down-and-up arpeggio at a phrase end, a walk-up). Check its every pass.
 - rows (filter_scale 0.6): several bars as a picture — the best overview of where a line moves (a rising chorus end).
 - profile: e.g. "is this bar Dm or E7?" — D A F strong and E/B/G# weak = Dm. Compare with a bar of known chord.
@@ -246,6 +252,42 @@ def cmd_notes16(a):
             print(f'   {n:>4}  ' + ''.join(cells))
 
 
+# ---------------------------------------------------------------- picked
+def cmd_picked(a):
+    """A guitarist who PICKS the bass part continuously (16ths): basic-pitch note starts on the stem, lowest started
+    note per 16th for each pass, then the consensus (notes found in >= --min passes). The tables of the other tools
+    are too thin here; this is what reads the busy part."""
+    import tempfile, soundfile as sf
+    from basic_pitch.inference import predict
+    bars = bars_of(a.W); starts = [int(x) for x in a.passes.split(',')]
+    lo, hi = librosa.note_to_midi(a.lo), librosa.note_to_midi(a.hi)
+    y, sr = sf.read(stem_path(a.W, a.stem)); y = y.mean(1) if y.ndim > 1 else y
+    from collections import Counter
+    table = {}
+    for s0 in starts:
+        t0 = bars[str(s0)]['t'] - 0.3; t1 = bars[str(s0 + a.nbars * a.tb)]['t'] + 0.3
+        with tempfile.NamedTemporaryFile(suffix='.wav') as f:
+            sf.write(f.name, y[int(t0 * sr):int(t1 * sr)], sr)
+            _, _, notes = predict(f.name, onset_threshold=0.5, frame_threshold=0.3, minimum_note_length=60,
+                                  minimum_frequency=60, maximum_frequency=800)
+        for k in range(a.nbars):
+            g = grid16(bars, s0 + k * a.tb, a.tb); d = (g[-1] - g[0]) / 16
+            row = []
+            for x in g[:-1]:
+                ns = [n[2] for n in notes if abs(n[0] + t0 - x) < d / 2 and n[3] >= a.vel and lo <= n[2] <= hi]
+                row.append(nm(min(ns)) if ns else '.')
+            table[(s0, k)] = row
+    print('          ' + ''.join(f'{l:<5}' for l in LAB16[:16]))
+    for k in range(a.nbars):
+        for s0 in starts:
+            print(f'b{s0 + k * a.tb:<4}    ' + ''.join(f'{x:<5}' for x in table[(s0, k)]))
+        cons = []
+        for j in range(16):
+            c = Counter(table[(s0, k)][j] for s0 in starts if table[(s0, k)][j] != '.').most_common(1)
+            cons.append(c[0][0] if c and c[0][1] >= a.min else '.')
+        print('  =>      ' + ''.join(f'{x:<5}' for x in cons) + '\n')
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('W'); ap.add_argument('--tb', type=int, default=2, help='tracker bars per real bar (default 2)')
@@ -263,6 +305,8 @@ def main():
     p = sub.add_parser('glide'); p.add_argument('stem'); p.add_argument('t0', type=float); p.add_argument('t1', type=float)
     p.add_argument('--notes', default='E2,F2,G2,G#2,A2,B2,C3,D3,E3')
     p = sub.add_parser('profile'); p.add_argument('stem'); p.add_argument('groups', nargs='+')
+    p = sub.add_parser('picked'); p.add_argument('stem'); p.add_argument('nbars', type=int); p.add_argument('--passes', required=True)
+    p.add_argument('--lo', default='E2'); p.add_argument('--hi', default='F#3'); p.add_argument('--vel', type=float, default=0.3); p.add_argument('--min', type=int, default=2)
     p = sub.add_parser('notes16'); p.add_argument('stem'); p.add_argument('notes'); p.add_argument('bars', nargs='+', type=int)
     a = ap.parse_args()
     globals()['cmd_' + a.cmd](a)
