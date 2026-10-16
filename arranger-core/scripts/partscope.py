@@ -51,7 +51,10 @@ def stem_path(W, stem):
 
 
 def bars_of(W):
-    return json.load(open(f'{W}/bars.json'))['bars']
+    d = json.load(open(f'{W}/bars.json')); bars = d['bars']
+    last = max(int(k) for k in bars)          # a closing bar at the song's end, so the last real bar has an end too
+    if 'end' in d and str(last + 1) not in bars: bars[str(last + 1)] = {'t': d['end'], 'nbeats': 4, 'beats': []}
+    return bars
 
 
 def grid8(bars, b, tb):

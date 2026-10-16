@@ -142,8 +142,6 @@ def main():
     TB = S.get('TB', 1)
     validate(S, TB)
     W = S['W']; bars = bars_of(W)
-    last = max(int(k) for k in bars)          # a closing bar so the last real bar has an end (the song's end time)
-    bars[str(last + 1)] = {'t': json.load(open(f'{W}/bars.json')).get('end', bars[str(last)]['t'] + 3.0), 'nbeats': 4, 'beats': []}
     fix = S.get('BAR_FIX', {})                # {bar: start time}: re-place bars the tracker got wrong (a rubato intro)
     for b, t in fix.items(): bars[str(b)]['t'] = float(t)
     for b in sorted({x for f in fix for x in (f - 1, f)}):
