@@ -19,3 +19,5 @@ __pycache__/
 *.swp
 *~
 .claude/settings.local.json
+
+examples/code-monkey/out-audition/

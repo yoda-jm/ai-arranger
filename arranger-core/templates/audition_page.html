@@ -1,0 +1,406 @@
+<title>__TITLE__</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column; per passage a player (band + synthesized part, live switching) and the question cards; picks + save at the end. */
+:root{
+  --paper:#f3f5f1; --panel:#ffffff; --ink:#1d2627; --muted:#5d6a69; --line:#d5dcd8;
+  --accent:#0d6b6f; --accent-soft:#dcecea; --on-accent:#ffffff; --play:#c98a12; --play-soft:#f7ead0; --ok:#2f7d4a;
+  --q1:#be185d; --q2:#6d28d9; --q3:#0369a1; --q4:#4d7c0f; --want:#dc2626; --want-soft:#fde2e2;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#121819; --panel:#1a2223; --ink:#e4ebe8; --muted:#9aa8a6; --line:#2e3a3b;
+  --accent:#55b8b2; --accent-soft:#1f3534; --on-accent:#0e1516; --play:#e8b64a; --play-soft:#3a3120; --ok:#6cc08a;
+  --q1:#f472b6; --q2:#b794f6; --q3:#5fb3e6; --q4:#9ccc65; --want:#f87171; --want-soft:#4a2020; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --paper:#121819; --panel:#1a2223; --ink:#e4ebe8; --muted:#9aa8a6; --line:#2e3a3b;
+  --accent:#55b8b2; --accent-soft:#1f3534; --on-accent:#0e1516; --play:#e8b64a; --play-soft:#3a3120; --ok:#6cc08a;
+  --q1:#f472b6; --q2:#b794f6; --q3:#5fb3e6; --q4:#9ccc65; --want:#f87171; --want-soft:#4a2020; color-scheme:dark;}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:15px/1.55 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+header{display:flex;flex-direction:column;gap:8px}
+.eyebrow{font:600 12px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1{font:700 clamp(34px,6vw,52px)/1 var(--display);letter-spacing:.01em;margin:0;text-wrap:balance}
+h2{font:600 28px/1.1 var(--display);margin:0;text-wrap:balance}
+h3{font:600 21px/1.1 var(--display);margin:0}
+.lede{max-width:70ch;color:var(--muted);margin:0}
+section.clip{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:16px}
+.dhead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px}
+.src{font:13px/1.3 var(--body);color:var(--muted)}
+.why{margin:0;max-width:72ch;color:var(--muted)}
+.player{display:flex;flex-direction:column;gap:10px;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px;
+  position:sticky;top:env(safe-area-inset-top,0px);z-index:5;box-shadow:0 6px 14px -10px rgba(0,0,0,.35)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.prow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+button{font:600 14px/1 var(--body);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:9px 14px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible,.opt:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);min-width:92px}
+.time{font:500 13px/1 var(--mono);color:var(--muted);font-variant-numeric:tabular-nums;min-width:86px}
+.mix{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--muted)}
+.mix label{display:flex;align-items:center;gap:6px}
+.mix input[type=range]{width:110px;accent-color:var(--accent)}
+.mix input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
+.bars{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(58px,1fr);gap:3px;overflow-x:auto;padding-bottom:2px}
+.bar{font:500 12px/1.2 var(--mono);text-align:left;padding:6px 6px 5px;border-radius:4px;background:var(--panel);border:1px solid var(--line);color:var(--muted);display:flex;flex-direction:column;gap:2px;position:relative;overflow:hidden}
+.bar b{font-weight:500;color:var(--ink);font-size:13px;white-space:nowrap}
+.bar small{font-size:10px;letter-spacing:.04em;white-space:nowrap}
+.bar small.secl{overflow:hidden;text-overflow:ellipsis;color:var(--accent)}
+.bar .fill{position:absolute;left:0;bottom:0;height:3px;background:var(--play);width:0}
+.bar.now{background:var(--play-soft);border-color:var(--play)}
+.bar.loop{outline:2px dashed var(--accent);outline-offset:-2px}
+.bar.inq::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--qc)}
+.ticks{display:grid;grid-template-columns:repeat(16,1fr);gap:1px;height:7px;margin-top:3px}
+.ticks i{background:var(--line);border-radius:1px}
+.ticks i:nth-child(4n+1){background:color-mix(in srgb,var(--muted) 45%,var(--line))}
+.ticks i.m{background:var(--qc)}
+.bar.flash{animation:flash .9s ease-out 1}
+@keyframes flash{0%{background:var(--qc)}100%{background:var(--panel)}}
+@media (prefers-reduced-motion: reduce){.bar.flash{animation:none}}
+.qkey{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
+.qkey button{font:500 12px/1 var(--body);padding:5px 8px;display:inline-flex;align-items:center;gap:6px}
+.chip{display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--qc);flex:none}
+.qhead{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.where{font:500 13px/1.3 var(--mono);color:var(--ink)}
+.q{border-left:4px solid var(--qc);padding-left:12px}
+.bar.sec{border-left:3px solid var(--accent)}
+.legend{font-size:12px;color:var(--muted)}
+.bar.want{background:repeating-linear-gradient(135deg,var(--want-soft) 0 6px,var(--panel) 6px 12px);border-color:var(--want)}
+.bar.want small:first-child{color:var(--want);font-weight:600}
+.bars.marking .bar{cursor:crosshair}
+button[aria-pressed="true"]{background:var(--want);border-color:var(--want);color:var(--on-accent)}
+.areas{display:flex;flex-direction:column;gap:8px}
+.area{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;border:1px solid var(--want);border-radius:6px;padding:8px 10px}
+.area b{font:600 16px/1.2 var(--display);color:var(--want);min-width:110px}
+.area span{font:500 12px/1.3 var(--mono);color:var(--muted)}
+.area input{flex:1 1 240px;font:14px/1.3 var(--body);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:7px 8px}
+.bars.long{grid-auto-flow:row;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));max-height:30vh;overflow-y:auto;overflow-x:hidden}
+.q{display:flex;flex-direction:column;gap:10px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.opt{border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;cursor:pointer;background:var(--panel)}
+.opt:hover{border-color:var(--accent)}
+.opt.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.opt .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.opt input{accent-color:var(--accent);width:18px;height:18px;margin:0}
+.opt .name{font:600 20px/1.1 var(--display)}
+.tag{font:600 11px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;padding:4px 6px;border-radius:4px;border:1px solid var(--accent);color:var(--accent);white-space:nowrap}
+.opt p{margin:0;font-size:14px;color:var(--muted)}
+.listen{font-size:12px;color:var(--accent);font-weight:600}
+.tabwrap{display:flex;flex-direction:column;gap:6px}
+.lbl{font:600 12px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tab{font:400 12px/1.35 var(--mono);white-space:pre;overflow-x:auto;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:10px;margin:0;color:var(--ink)}
+.kept{display:flex;flex-direction:column;gap:6px;margin:0;padding-left:18px;color:var(--muted)}
+.summary{background:var(--panel);border:1px solid var(--accent);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.picks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.pick{border:1px solid var(--line);border-radius:6px;padding:8px 10px;display:flex;flex-direction:column;gap:2px}
+.pick span{font:600 11px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pick b{font:600 18px/1.2 var(--display)}
+textarea{font:14px/1.4 var(--body);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:8px;width:100%;min-height:60px;resize:vertical}
+.saverow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.status{font-size:13px;color:var(--muted)}
+.status.ok{color:var(--ok)}
+.copyline{font:13px/1.4 var(--mono);background:var(--paper);border:1px dashed var(--line);border-radius:6px;padding:8px 10px;word-break:break-word}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Decide by ear</div>
+    <h1 id="title"></h1>
+    <p class="lede" id="intro"></p>
+  </header>
+  <div id="clips" style="display:flex;flex-direction:column;gap:28px"></div>
+  <section class="clip" id="chartBox" hidden>
+    <div class="dhead"><h2>The chart</h2></div>
+    <pre class="tab" id="chart"></pre>
+  </section>
+  <section class="clip" id="keptBox" hidden>
+    <div class="dhead"><h2>Already settled</h2></div>
+    <ul class="kept" id="kept"></ul>
+  </section>
+  <section class="summary" aria-live="polite">
+    <h2 id="sumTitle">Your picks</h2>
+    <div class="picks" id="picks"></div>
+    <div id="areasBox" class="areas" hidden><h3>Where you want alternatives</h3><div class="areas" id="areas"></div></div>
+    <label for="note" class="legend" id="noteLabel">Anything else for the next revision (optional)</label>
+    <textarea id="note"></textarea>
+    <div class="saverow"><button class="primary" id="save" type="button">Save for Claude</button><span class="status" id="status"></span></div>
+    <div class="copyline" id="copyline" hidden></div>
+  </section>
+</div>
+
+<script id="DATA" type="application/json">__DATA__</script>
+__AUDIO__
+<script>
+(function(){
+const D = JSON.parse(document.getElementById('DATA').textContent);
+const Q = D.questions, sel = {};
+for (const q in Q) sel[q] = Q[q].default || Q[q].options[0].id;
+document.getElementById('title').textContent = D.title;
+document.getElementById('intro').textContent = D.intro;
+if (D.chart){ document.getElementById('chartBox').hidden = false; document.getElementById('chart').textContent = D.chart; }
+if (!Object.keys(Q).length){ document.getElementById('sumTitle').textContent = 'Anything to fix?';
+  document.getElementById('picks').hidden = true;
+  document.getElementById('noteLabel').textContent = 'What sounds wrong, with the bar numbers (optional)'; }
+if (D.kept && D.kept.length){ document.getElementById('keptBox').hidden = false;
+  document.getElementById('kept').innerHTML = D.kept.map(k => '<li>' + esc(k) + '</li>').join(''); }
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function optName(q, id){ return Q[q].options.find(o => o.id === id).name; }
+const QK = Object.keys(Q), L16 = ['1','1e','1&','1a','2','2e','2&','2a','3','3e','3&','3a','4','4e','4&','4a'];
+function qc(q){ return `var(--q${QK.indexOf(q) % 4 + 1})`; }
+function marks(c, q){ return (D.marks && D.marks[c.id] && D.marks[c.id][q]) || {}; }
+function markedBars(c, q){ return Object.keys(marks(c, q)).map(Number).sort((a, b) => a - b); }
+function whereText(c, q){ const m = marks(c, q); return markedBars(c, q).map(b => `bar ${b}: ${m[b].map(k => L16[k]).join(' ')}`).join(' · '); }
+function comboKey(c){ return c.questions.map(q => sel[q]).join('|') || 'only'; }
+function slots(c){   /* every part source to play: one combined part, or a base layer + the selected option's segments */
+  if (!c.segs) return [{key: '_', id: 'a_part_' + c.id + '_' + comboKey(c).replace(/\|/g, '_'), t: 0}];
+  const out = [{key: 'base', id: 'a_part_' + c.id + '_base', t: 0}];
+  for (const q in c.segs) for (const sg of c.segs[q]) out.push({key: q + ':' + sg.lo, id: 'a_part_' + c.id + '_' + q + '_' + sel[q] + '_' + sg.lo, t: sg.t});
+  return out;
+}
+
+/* ---------- audio: band + part buffers started together; the part is swapped live ---------- */
+let ctx = null, master = null; const buffers = {}, players = {};
+function ensureCtx(){
+  if (!ctx){ ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createDynamicsCompressor(); master.threshold.value = -10; master.ratio.value = 4; master.connect(ctx.destination); }
+  if (ctx.state === 'suspended') ctx.resume();
+}
+function getBuf(id){
+  if (!buffers[id]) buffers[id] = new Promise((res, rej) => {
+    const s = atob(document.getElementById(id).textContent.trim()), u = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
+    ctx.decodeAudioData(u.buffer, res, rej);
+  });
+  return buffers[id];
+}
+function fmt(t){ t = Math.max(0, t); return Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0'); }
+
+function buildClip(c){
+  const sec = document.createElement('section'); sec.className = 'clip';
+  sec.innerHTML = `<div class="dhead"><h2>${esc(c.title)}</h2><span class="src">${esc(c.src)}</span></div>
+    ${c.why ? `<p class="why">${esc(c.why)}</p>` : ''}
+    <div class="player">
+      <div class="prow">
+        <button class="primary" type="button" id="play-${c.id}">Play</button>
+        <button type="button" id="restart-${c.id}">From the start</button>
+        <span class="time" id="time-${c.id}">0:00 / ${fmt(c.dur)}</span>
+        <div class="mix">
+          <label for="vb-${c.id}">Band <input id="vb-${c.id}" type="range" min="0" max="1" step="0.05" value="0.7"></label>
+          <label for="vs-${c.id}">Part <input id="vs-${c.id}" type="range" min="0" max="1" step="0.05" value="0.85"></label>
+          <label for="lp-${c.id}"><input id="lp-${c.id}" type="checkbox"> Loop 2 bars from the clicked bar</label>
+        </div>
+      </div>
+      <div class="prow"><button type="button" id="mm-${c.id}" aria-pressed="false">Mark bars: off</button><button type="button" id="mn-${c.id}">Mark the bar playing now (M)</button><span class="legend" id="mh-${c.id}">Mark the bars where you want other versions; they are listed at the bottom with a note box.</span></div>
+      <div class="qkey" id="qkey-${c.id}"></div>
+      <div class="bars" id="bars-${c.id}"></div>
+      <div class="legend">Playing: <b id="now-${c.id}"></b></div>
+    </div>
+    <div id="qs-${c.id}" style="display:flex;flex-direction:column;gap:18px"></div>
+    ${!c.layers && D.tabs[c.id] && Object.keys(D.tabs[c.id]).length ? `<div class="tabwrap"><div class="lbl">Tab with the options selected above</div><pre class="tab" id="tab-${c.id}"></pre></div>` : ''}`;
+  document.getElementById('clips').appendChild(sec);
+  const P = {c, playing:false, offset:0, startedAt:0, band:null, srcs:{}, cur:{}, gBand:null, gPart:null, raf:0, loopFrom:0};
+  const barsEl = sec.querySelector('.bars');
+  c.labels.forEach((lab, i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'bar' + (lab.sec ? ' sec' : '');
+    const bn = c.first + i, mq = c.questions.filter(q => marks(c, q)[bn]);
+    let ticks = '';
+    if (mq.length){
+      b.classList.add('inq'); b.style.setProperty('--qc', qc(mq[0])); b.dataset.q = mq.join(' ');
+      const on = new Set(mq.flatMap(q => marks(c, q)[bn]));
+      ticks = '<span class="ticks" aria-hidden="true">' + L16.map((_, k) => `<i${on.has(k) ? ' class="m"' : ''}></i>`).join('') + '</span>';
+      b.title = mq.map(q => Q[q].label + ': ' + marks(c, q)[bn].map(k => L16[k]).join(' ')).join('\n');
+    }
+    b.innerHTML = `<small>${bn}</small><b>${esc(lab.ch)}</b>${lab.sec ? `<small class="secl">${esc(lab.sec)}</small>` : ''}${ticks}<span class="fill"></span>`;
+    if (lab.sec && !b.title) b.title = lab.sec;
+    b.addEventListener('click', () => { if (markMode[c.id]) { toggleBar(c, c.first + i); return; } P.loopFrom = i; markLoop(P); seek(P, Math.max(0, c.bars[i] - 0.05)); });
+    barsEl.appendChild(b);
+  });
+  P.barEls = [...barsEl.children];
+  if (c.labels.length > 24) barsEl.classList.add('long');
+  sec.querySelector('#mm-' + c.id).addEventListener('click', e => { markMode[c.id] = !markMode[c.id];
+    e.target.setAttribute('aria-pressed', markMode[c.id]); e.target.textContent = 'Mark bars: ' + (markMode[c.id] ? 'on' : 'off');
+    barsEl.classList.toggle('marking', markMode[c.id]);
+    document.getElementById('mh-' + c.id).textContent = markMode[c.id] ? 'Click bars to mark or unmark them. Turn it off to jump by clicking again.' : 'Mark the bars where you want other versions; they are listed at the bottom with a note box.'; });
+  sec.querySelector('#mn-' + c.id).addEventListener('click', () => markNow(P));
+  const key = sec.querySelector('.qkey');
+  if (c.questions.some(q => markedBars(c, q).length)){
+    key.innerHTML = '<span>Where each question changes the part:</span>';
+    c.questions.forEach(q => { if (!markedBars(c, q).length) return;
+      const k = document.createElement('button'); k.type = 'button'; k.style.setProperty('--qc', qc(q));
+      k.innerHTML = `<span class="chip"></span>${esc(Q[q].label)}`; k.title = 'Hear this spot';
+      k.addEventListener('click', () => hear(c, q)); key.appendChild(k); });
+  }
+  sec.querySelector('#play-' + c.id).addEventListener('click', () => P.playing ? pause(P) : play(P));
+  sec.querySelector('#restart-' + c.id).addEventListener('click', () => { P.loopFrom = 0; markLoop(P); seek(P, 0, true); });
+  sec.querySelector('#vb-' + c.id).addEventListener('input', e => { if (P.gBand) P.gBand.gain.value = +e.target.value; });
+  sec.querySelector('#vs-' + c.id).addEventListener('input', e => { if (P.gPart) P.gPart.gain.value = +e.target.value; });
+  sec.querySelector('#lp-' + c.id).addEventListener('change', () => { markLoop(P); if (P.playing) seek(P, loopRange(P)[0]); });
+  players[c.id] = P;
+}
+const marked = {}, areaNote = {}, markMode = {};
+function curBar(P){ const t = pos(P), c = P.c; let i = 0; while (i + 1 < c.bars.length && t >= c.bars[i + 1]) i++; return c.first + i; }
+function toggleBar(c, bn, on){ const s = marked[c.id] || (marked[c.id] = new Set());
+  if (on === undefined) on = !s.has(bn); on ? s.add(bn) : s.delete(bn); paintMarks(c); renderAreas(); status('', false); }
+function markNow(P){ toggleBar(P.c, curBar(P), true); }
+function areas(c){ const s = [...(marked[c.id] || [])].sort((a, b) => a - b), out = [];
+  for (const b of s){ const l = out[out.length - 1]; if (l && b === l.to + 1) l.to = b; else out.push({from: b, to: b}); } return out; }
+function paintMarks(c){ const P = players[c.id]; if (!P) return; const s = marked[c.id] || new Set();
+  P.barEls.forEach((el, i) => el.classList.toggle('want', s.has(c.first + i))); }
+function chordsOf(c, a){ const r = []; for (let b = a.from; b <= a.to; b++) r.push(c.labels[b - c.first].ch); return r.join(' | '); }
+function renderAreas(){
+  const box = document.getElementById('areas'); box.innerHTML = ''; let n = 0;
+  for (const c of D.clips) for (const a of areas(c)){ n++;
+    const key = c.id + ':' + a.from, sec = c.labels[a.from - c.first].sec || '';
+    const row = document.createElement('div'); row.className = 'area';
+    row.innerHTML = `<b>Bar${a.to > a.from ? 's ' + a.from + '-' + a.to : ' ' + a.from}</b><span>${esc(chordsOf(c, a))}${sec ? ' · ' + esc(sec) : ''}</span><input type="text" id="an-${c.id}-${a.from}" placeholder="What would you like to try here?"><button type="button">Hear it</button><button type="button">Remove</button>`;
+    const inp = row.querySelector('input'); inp.value = areaNote[key] || ''; inp.addEventListener('input', () => { areaNote[key] = inp.value; });
+    const [hearB, rmB] = row.querySelectorAll('button');
+    hearB.addEventListener('click', () => { const P = players[c.id], i = Math.max(0, a.from - c.first - 1); P.loopFrom = i; markLoop(P); seek(P, Math.max(0, c.bars[i] - 0.05), true); });
+    rmB.addEventListener('click', () => { for (let b = a.from; b <= a.to; b++) marked[c.id].delete(b); paintMarks(c); renderAreas(); });
+    box.appendChild(row); }
+  document.getElementById('areasBox').hidden = !n;
+}
+document.addEventListener('keydown', e => { if ((e.key === 'm' || e.key === 'M') && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)){
+  const P = Object.values(players).find(p => p.playing); if (P){ markNow(P); e.preventDefault(); } } });
+function hear(c, q){
+  const P = players[c.id], bs = markedBars(c, q);
+  const first = bs.length ? bs[0] : (c.layers && c.layers[q] ? c.layers[q][0][0] : c.first);
+  const i = Math.max(0, Math.min(c.labels.length - 1, first - c.first - 1));
+  P.loopFrom = i; markLoop(P); seek(P, Math.max(0, c.bars[i] - 0.05), true);
+}
+function flash(c, q){
+  const P = players[c.id]; if (!P) return;
+  P.barEls.forEach(el => { if ((el.dataset.q || '').split(' ').includes(q)){ el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); } });
+  if (!P.playing){ const bs = markedBars(c, q); if (bs.length){ const i = Math.max(0, bs[0] - c.first - 1); P.loopFrom = i; P.offset = Math.max(0, c.bars[i] - 0.05); markLoop(P); draw(P); } }
+}
+function looping(P){ return document.getElementById('lp-' + P.c.id).checked; }
+function loopRange(P){ const c = P.c, i = P.loopFrom; return [c.bars[i] - 0.05, i + 2 < c.bars.length ? c.bars[i + 2] - 0.05 : c.end]; }
+function markLoop(P){ const on = looping(P); P.barEls.forEach((el, i) => el.classList.toggle('loop', on && (i === P.loopFrom || i === P.loopFrom + 1))); }
+function pos(P){ return P.playing ? P.offset + (ctx.currentTime - P.startedAt) : P.offset; }
+function schedule(P, sl, buf, at, when){   /* play slot sl so that clip time 'at' sounds at context time 'when' */
+  const rel = at - sl.t; if (rel >= buf.duration) return null;
+  const s = ctx.createBufferSource(); s.buffer = buf; s.connect(P.gPart);
+  if (rel >= 0) s.start(when, rel); else s.start(when - rel, 0);
+  return s;
+}
+async function start(P, at){
+  const sl = slots(P.c);
+  const [bandBuf, ...bufs] = await Promise.all([getBuf('a_band_' + P.c.id), ...sl.map(x => getBuf(x.id))]);
+  P.gBand = ctx.createGain(); P.gBand.gain.value = +document.getElementById('vb-' + P.c.id).value; P.gBand.connect(master);
+  P.gPart = ctx.createGain(); P.gPart.gain.value = +document.getElementById('vs-' + P.c.id).value; P.gPart.connect(master);
+  const t = ctx.currentTime + 0.05;
+  P.band = ctx.createBufferSource(); P.band.buffer = bandBuf; P.band.connect(P.gBand); P.band.start(t, at);
+  P.srcs = {}; P.cur = {};
+  sl.forEach((x, i) => { const s = schedule(P, x, bufs[i], at, t); if (s) P.srcs[x.key] = s; P.cur[x.key] = x.id; });
+  P.startedAt = t; P.offset = at;
+  const me = P.band;
+  me.onended = () => { if (P.band === me && P.playing){ stop(P); P.playing = false; P.offset = 0; setBtn(P); draw(P); } };
+}
+function stop(P){ try { P.band && P.band.stop(); } catch(e){} P.band = null; for (const k in P.srcs) { try { P.srcs[k].stop(); } catch(e){} } P.srcs = {}; }
+async function play(P){
+  ensureCtx();
+  for (const k in players) if (players[k] !== P && players[k].playing) pause(players[k]);
+  P.playing = true; setBtn(P, 'Loading…');
+  let at = P.offset >= P.c.dur - 0.2 ? 0 : P.offset;
+  if (looping(P)){ const [a, b] = loopRange(P); if (at < a || at >= b) at = a; }
+  try { await start(P, at); } catch(e){ P.playing = false; setBtn(P); document.getElementById('now-' + P.c.id).textContent = 'This browser could not decode the audio.'; return; }
+  setBtn(P); loop(P);
+}
+function pause(P){ P.offset = pos(P); stop(P); P.playing = false; setBtn(P); cancelAnimationFrame(P.raf); draw(P); }
+async function seek(P, t, autoplay){
+  if (P.playing){ stop(P); P.playing = true; P.seeking = true; await start(P, t); P.seeking = false; } else { P.offset = t; draw(P); if (autoplay) play(P); }
+}
+async function swapPart(c){
+  const P = players[c.id]; updateNow(P); if (!P || !P.playing) return;
+  for (const x of slots(c)){
+    if (P.cur[x.key] === x.id) continue;
+    const buf = await getBuf(x.id); if (!P.playing) return;
+    const at = pos(P) + 0.03;
+    try { P.srcs[x.key] && P.srcs[x.key].stop(); } catch(e){}
+    const s = schedule(P, x, buf, at, ctx.currentTime + 0.03);
+    if (s) P.srcs[x.key] = s; else delete P.srcs[x.key];
+    P.cur[x.key] = x.id;
+  }
+}
+function setBtn(P, txt){ document.getElementById('play-' + P.c.id).textContent = txt || (P.playing ? 'Pause' : 'Play'); }
+function loop(P){
+  draw(P);
+  if (P.playing && !P.seeking && looping(P)){ const [a, b] = loopRange(P); if (pos(P) >= b) seek(P, a); }
+  if (P.playing) P.raf = requestAnimationFrame(() => loop(P));
+}
+function draw(P){
+  const c = P.c, t = pos(P);
+  document.getElementById('time-' + c.id).textContent = fmt(t) + ' / ' + fmt(c.dur);
+  P.barEls.forEach((el, i) => {
+    const a = c.bars[i], b = i + 1 < c.bars.length ? c.bars[i + 1] : c.end, on = t >= a && t < b;
+    el.classList.toggle('now', on); el.querySelector('.fill').style.width = on ? (100 * (t - a) / (b - a)).toFixed(1) + '%' : '0';
+    if (on && P.lastBar !== i){ P.lastBar = i; const box = el.parentElement;
+      if (box.scrollHeight > box.clientHeight + 2){ const top = el.offsetTop - box.offsetTop;
+        if (top < box.scrollTop || top + el.offsetHeight > box.scrollTop + box.clientHeight) box.scrollTop = Math.max(0, top - box.clientHeight / 3); } }
+  });
+}
+function updateNow(P){ if (P) document.getElementById('now-' + P.c.id).textContent = P.c.questions.map(q => optName(q, sel[q])).join(' + ') || 'the chart as written'; }
+
+/* ---------- questions ---------- */
+function render(){
+  for (const c of D.clips){
+    const box = document.getElementById('qs-' + c.id); box.innerHTML = '';
+    for (const q of c.questions){
+      const wrap = document.createElement('div'); wrap.className = 'q';
+      wrap.style.setProperty('--qc', qc(q));
+      const where = whereText(c, q);
+      wrap.innerHTML = `<div class="qhead"><span class="chip"></span><h3>${esc(Q[q].label)}</h3>${where ? `<span class="where">${esc(where)}</span>` : ''}<button type="button" class="hear">Hear this spot</button></div>${Q[q].why ? `<p class="why">${esc(Q[q].why)}</p>` : ''}<div class="opts"></div>`;
+      wrap.querySelector('.hear').addEventListener('click', () => hear(c, q));
+      const opts = wrap.querySelector('.opts');
+      for (const o of Q[q].options){
+        const lab = document.createElement('label'); lab.className = 'opt' + (sel[q] === o.id ? ' sel' : ''); lab.htmlFor = `o-${q}-${o.id}`;
+        lab.innerHTML = `<span class="top"><input type="radio" name="q-${q}" id="o-${q}-${o.id}" ${sel[q] === o.id ? 'checked' : ''}><span class="name">${esc(o.name)}</span>${o.tag ? `<span class="tag">${esc(o.tag)}</span>` : ''}</span><p>${esc(o.text || '')}</p><span class="listen">${sel[q] === o.id ? 'Selected: the player uses this one' : 'Select to hear it in the player'}</span>`;
+        lab.querySelector('input').addEventListener('change', () => { sel[q] = o.id; render(); swapPart(c); flash(c, q); status('', false); });
+        opts.appendChild(lab);
+      }
+      if (c.layers && D.tabs[c.id][q + '=' + sel[q]]){
+        const t = document.createElement('div'); t.className = 'tabwrap';
+        t.innerHTML = `<div class="lbl">Tab: ${esc(optName(q, sel[q]))}</div><pre class="tab"></pre>`;
+        t.querySelector('pre').textContent = D.tabs[c.id][q + '=' + sel[q]]; wrap.appendChild(t);
+      }
+      box.appendChild(wrap);
+    }
+    const tb = document.getElementById('tab-' + c.id); if (tb) tb.textContent = D.tabs[c.id][comboKey(c)] || '';
+    updateNow(players[c.id]);
+  }
+  document.getElementById('picks').innerHTML = Object.keys(Q).map(q => `<div class="pick"><span>${esc(Q[q].label)}</span><b>${esc(optName(q, sel[q]))}</b></div>`).join('');
+}
+function status(t, ok){ const s = document.getElementById('status'); s.textContent = t; s.classList.toggle('ok', !!ok); }
+
+/* ---------- save: db doc decisions/<id>, read back by Claude ---------- */
+let docRef = null;
+function copyText(){ const n = document.getElementById('note').value.trim(); const m = D.clips.flatMap(c => areas(c).map(a => `bars ${a.from}-${a.to}${areaNote[c.id + ':' + a.from] ? ' (' + areaNote[c.id + ':' + a.from] + ')' : ''}`)); return D.id + ' picks: ' + Object.keys(Q).map(q => q + '=' + sel[q]).join(', ') + (m.length ? ' · alternatives wanted: ' + m.join('; ') : '') + (n ? ' · note: ' + n : ''); }
+document.getElementById('save').addEventListener('click', async () => {
+  const cl = document.getElementById('copyline');
+  if (!docRef){ cl.hidden = false; cl.textContent = copyText(); status('Saving is not available in this view. Paste the line below to Claude.', false); return; }
+  status('Saving…', false);
+  const mk = {}; for (const c of D.clips){ const as = areas(c); if (as.length) mk[c.id] = as.map(a => ({from: a.from, to: a.to, chords: chordsOf(c, a), note: (areaNote[c.id + ':' + a.from] || '').trim()})); }
+  try { await docRef.set(Object.assign({}, sel, {note: document.getElementById('note').value.trim(), marks: mk, savedAt: new Date().toISOString()}));
+    status('Saved. Tell Claude "picks saved".', true); cl.hidden = true; }
+  catch(e){ cl.hidden = false; cl.textContent = copyText(); status('Could not save (' + ((e && e.code) || 'error') + '). Paste the line below to Claude.', false); }
+});
+
+D.clips.forEach(buildClip); render();
+(async () => {
+  try {
+    const db = window.claude && await window.claude.use('db'); if (!db) return;
+    docRef = db.doc('decisions/' + D.id);
+    const snap = await docRef.get();
+    if (snap.exists){ const d = snap.data();
+      for (const q in Q) if (d[q] && Q[q].options.some(o => o.id === d[q])) sel[q] = d[q];
+      if (d.note) document.getElementById('note').value = d.note;
+      if (d.marks) for (const c of D.clips) for (const a of (d.marks[c.id] || [])){ for (let b = a.from; b <= a.to; b++) (marked[c.id] || (marked[c.id] = new Set())).add(b); if (a.note) areaNote[c.id + ':' + a.from] = a.note; }
+      D.clips.forEach(paintMarks); renderAreas();
+      render(); status('Loaded your saved picks from ' + new Date(d.savedAt).toLocaleString() + '.', true); }
+  } catch(e){ /* the page works without saving */ }
+})();
+})();
+</script>

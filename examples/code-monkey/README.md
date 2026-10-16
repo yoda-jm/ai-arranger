@@ -173,6 +173,15 @@ examples/code-monkey/
   regenerate.sh        makes the byproducts and the sheets again
 ```
 
+## Decide by ear: an audition page on chorus 1
+`arranger-core/templates/audition_spec.py` runs on this example. The page plays chorus 1 without the record's bass (`BAND_STEMS`) and lays a synthesized bass on the song's bar grid, with two questions: the groove under bars 24-31, and a fill in bar 32. The options are only there to show the tool; the record's own bass part is in `sheets/`. After `regenerate.sh`:
+
+```bash
+python arranger-core/scripts/audition.py arranger-core/templates/audition_spec.py examples/code-monkey/out-audition --check other
+```
+
+It writes `out-audition/code-monkey-chorus-bass.html` (1.3 MB, not kept in git). Open it in a browser, or publish it as a Claude artifact with the `db` capability so the picks can be saved. Guide: [`arranger-core/references/audition.md`](../../arranger-core/references/audition.md).
+
 ## Next
 - an a cappella version, one of the lineups in `acappella-arranger/references/styles.md`;
 - a band version from `south-american-arranger`;

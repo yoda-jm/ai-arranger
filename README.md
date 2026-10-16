@@ -31,7 +31,7 @@ The rule behind everything: **the recording is the truth**. Drafts, the original
 
 | Skill | Role |
 |---|---|
-| [`arranger-core`](arranger-core/SKILL.md) | The base everything runs on. **Analysis** (Demucs stems, karaoke lead/backing split, beat_this bar map, key, chords, drum grid, Whisper words → `report.md`). **Transcription**: a whole song into `song.py`, or one part note by note with `partscope.py` (see [transcription.md](arranger-core/references/transcription.md)). The **engine**, **build** (MusicXML → MuseScore → PDF/MIDI/PNG), **render** (fluidsynth) and **QA**. |
+| [`arranger-core`](arranger-core/SKILL.md) | The base everything runs on. **Analysis** (Demucs stems, karaoke lead/backing split, beat_this bar map, key, chords, drum grid, Whisper words → `report.md`). **Transcription**: a whole song into `song.py`, or one part note by note with `partscope.py` (see [transcription.md](arranger-core/references/transcription.md)). **Decide by ear** with `audition.py` ([guide](arranger-core/references/audition.md)): each candidate version of a part, synthesized on the recording's bar map and played over the real recording, in a page where the musician switches options live, marks bars to rework and saves the picks for the next revision. The **engine**, **build** (MusicXML → MuseScore → PDF/MIDI/PNG), **render** (fluidsynth) and **QA**. |
 | [`acappella-arranger`](acappella-arranger/SKILL.md) | 4-8 part vocal arrangements, from SATB up to Solo + SSATBarB + vocal percussion. Pads, block harmony, instrument imitations, beatbox. [Style cards](acappella-arranger/references/styles.md) for barbershop, Pentatonix and VoicePlay. |
 | [`south-american-arranger`](south-american-arranger/SKILL.md) | Re-genres a song for a 5-piece band (percussion, small drums, guitar/ukulele, bass, 5 singers) in bossa, samba, son, tango and a dozen other South American styles, as a full transplant or as touches. The band profile is a file you can adapt to your own lineup. |
 
@@ -59,6 +59,7 @@ Lessons that shaped the tools are written into the skills (see each SKILL.md's p
 - Two plucks a 16th apart at a slow tempo are 0.23 s apart. Long analysis windows merge them, so the re-pluck test uses a short FFT, plus a held note as a control.
 - Find beat 1 from where the chord roots land, not from where a repeating figure starts.
 - A live cover can change the record's chords (a Dm where the record has E7). Show the evidence and let the musician decide.
+- When several readings are defensible, let the musician hear them inside the band (an audition page) rather than describing them in text.
 - When the musician doubts a note, re-test it with a finer tool.
 
 New styles and lineups are researched with a written method ([style-research.md](arranger-core/references/style-research.md)):

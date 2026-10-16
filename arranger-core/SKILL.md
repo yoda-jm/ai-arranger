@@ -19,6 +19,7 @@ You can't listen, so verify with the tools: `look.py` piano rolls and text views
 | The user wants... | Path |
 |---|---|
 | a part written down: a bass line from a live video, a guitarist's low notes, a riff from a phone video, a tab or chart checked/continued | §1, then §2b + [references/transcription.md](references/transcription.md) |
+| to choose between versions of a part by ear (record or live, rhythm, octave, fill), or a last listen-through of a chart | `audition.py`: the options superposed on the real recording, picks saved for Claude ([references/audition.md](references/audition.md)) |
 | a song's grid, lyrics, form, melody (as a lead sheet or a base to re-arrange) | §1-§2 (`song.py`) |
 | an a cappella cover (SATB to 8 voices, a Pentatonix-style lineup with beatbox) | `acappella-arranger` |
 | a re-genred band cover (bossa, samba, son, tango...) | `south-american-arranger` |
@@ -89,6 +90,7 @@ Full method, chart conventions and the mistakes already made: [references/transc
   - remarks in footnotes.
 - **Send it** to the band's [TroubaStack](https://github.com/yoda-jm/troubastack) server if they use one: the tab becomes a chart in its dialect, saved through its API with a preview first. See [references/troubastack.md](references/troubastack.md).
 - **Report**: per-beat tables with video timestamps and a counting ruler over the tab. Confirm how the user counts bars (at double tempo their "bar 7" is a half bar).
+- **Let the user decide by ear** whenever several readings are defensible (the record's line or the live one, where a double falls, how a fill ends). `audition.py` synthesizes each option on the recording's bar map and plays it in sync over the real recording, in a page with live switching, loops, tabs and a "Save for Claude" button. Read the picks back with the Artifact tool (`read_db`). Guide: [references/audition.md](references/audition.md).
 
 ## 3. Arrange (the style skill's job), then build → check → listen
 ```bash
@@ -132,9 +134,9 @@ $PY $C/qa.py $A/out && $PY $C/render.py $A/out
 ## Files
 - `scripts/`:
   - analysis: `analyze.py` · `barmap.py` · `report.py` · `look.py` · `words.py` (lyrics second opinion) · `acap.py` (shared helpers, `Bars`, `Layout`)
-  - part transcription: `partscope.py` (lowest / stack / rows / onsets / repluck / glide / profile)
+  - part transcription: `partscope.py` (lowest / stack / rows / onsets / repluck / glide / profile / notes16 / picked) · `audition.py` (options superposed on the recording, for the user to pick by ear)
   - checking against master tracks: `groundtruth.py` (aligns official multitracks to the mix, shows who plays when, scores each part: pitch per 16th, drum hits by spectrum)
   - arranging: `engine.py` · `build.py` · `render.py` · `qa.py` · `fretboard.py` (guitar chord shapes, string/fret placement for TAB staves) · `compact.py` (the short score: repeats, endings, D.C./Coda, stacked verses, % signs, multi-measure rests; checked against the written-out MIDI)
   - install: `setup.sh` · `check_env.py`
-- `references/`: install · analysis · transcription (one part → tab/chart) · troubastack (send charts and tabs to a band's TroubaStack server) · engine · notation · style-research (how to find what is core to a new style or lineup, with a worked log)
-- `templates/song.py`
+- `references/`: install · analysis · transcription (one part → tab/chart) · audition (decide by ear: options over the recording, saved picks) · troubastack (send charts and tabs to a band's TroubaStack server) · engine · notation · style-research (how to find what is core to a new style or lineup, with a worked log)
+- `templates/`: `song.py` · `audition_spec.py` + `audition_page.html` (the audition page)

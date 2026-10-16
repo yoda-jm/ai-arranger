@@ -129,9 +129,34 @@ A full-band transcription (`examples/code-monkey/`) was scored against the song'
 5. Published transcriptions and any official stems cross-checked.
 6. Notation choices and simplifications listed in the README.
 
-## 9. Reporting
+## 9. Let the user decide by ear: audition pages (`audition.py`)
+When a part has several defensible readings, don't describe them: **let the musician hear each one inside the band**. `audition.py` synthesizes each option on the recording's own bar map and plays it in sync over the real recording, in a page where the user:
+- switches options while the band keeps playing;
+- loops the spot and reads each option's tab;
+- marks bars that still need work;
+- saves the picks.
+
+Claude reads them back (`read_db`, collection `decisions`) and writes the next revision. Full guide: [audition.md](audition.md).
+
+Several text-only revisions had left the user "still not convinced". Eight audition rounds settled every open point of the same chart, and the user asked to keep the technique as the way to decide.
+
+```bash
+cp $C/../templates/audition_spec.py $A/audition_<topic>.py    # edit: clips (bar ranges + chord labels), questions, part()
+$PY $C/audition.py $A/audition_<topic>.py $A/out_audition --check other   # --check prints the timing offset
+```
+
+The rules that made it work (details in audition.md):
+- **Ground every option in evidence**, and say which in the option's text. For example: "the guitarist plays it in both concerts (10 passes)", "both online tabs of the record", "your sketch".
+  - Mark the version now on the chart.
+  - Put the measured version among the options.
+- **Small rounds**: 1-3 questions on one passage, with `layers` when they sit on different bars of a long passage or recur over the whole song. Then save, revise, and do the next round.
+- **A whole-song listen-through** between rounds catches what short clips miss. The user marks bars on it, and the marks become the next round.
+- **Check the timing** (`--check`) and the bar map (`BAR_FIX` for a rubato intro) before publishing.
+- Say plainly that the part is synthesized and that you can't hear it.
+
+## 10. Reporting
 - Lead with what was found and what changed.
 - For each claim: the video timestamp, and what is heard per beat.
 - Separate "the pattern" from "slips in one pass".
 - Say plainly when a previous answer of yours was wrong and why (which tool failed).
-- Put decisions that are the user's in a question (record chord or live chord? fill an empty stave?), not in silent edits.
+- Put decisions that are the user's in a question (record chord or live chord? fill an empty stave?), not in silent edits. When the answer is a matter of ear, build an audition page (§9) instead of describing the options in text.
