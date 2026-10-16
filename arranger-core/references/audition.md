@@ -80,12 +80,13 @@ Plain Python, run with `runpy`. Every key, as `audition.py --help` prints it:
 | `QUESTIONS` | `{qid: dict(label, why, default, options=[dict(id, name, text, tag)])}` |
 | `KEPT` | points already settled, with their evidence, listed under the players |
 | `CHART` | the chart text, shown under the players (for a listen-through) |
-| `part(clip_id, choice)` | returns `{bar: [(k16, midi, dur16[, (string, fret)]), ...]}` for one combination of options |
+| `part(clip_id, choice)` | returns `{bar: [(k16, midi, dur16[, (string, fret)[, tech]]), ...]}` for one combination of options |
 
 Notes on `part()`:
 - `k16` is the 16th-note index 0-15 in the bar.
 - A `dur16` running past 16 **ties over the barline**, for a push. In that option, drop the next bar's downbeat note.
 - `(string, fret)` is optional, e.g. `('G', 4)`. Without it, the tab takes the lowest fret.
+- `tech` is optional: `'h'` hammer-on, `'p'` pull-off, `'/'` or `'\\'` slide, as written in the tab. The note is then played **legato** from the previous note: no new attack, and the pitch steps (h, p) or glides into the beat (slides), with MIDI pitch bend. A synth playing each tab digit as a new attack makes ornaments sound wrong; render them legato, or give the player a "removed" option to compare by ear.
 - `choice` maps each question of the clip to an option id.
 
 Labels: one `(chord, section)` per bar. A space splits the bar into two chords (`'E E/D#'`), so don't put spaces inside a chord name. The section goes on the bar where it starts and stays `''` elsewhere.
@@ -124,7 +125,7 @@ Generated from `templates/audition_page.html`, with all the audio embedded (AAC)
 - The heading names the bars and beats; "Hear this spot" starts one bar before.
 - Selecting an option swaps it in while the band keeps playing, and the bars it changes flash.
 
-**Tabs:** the tab of the selected option (for layers, the first range of each question).
+**Tabs:** the tab of the selected option (for layers, the first range of each question: list the most telling range first), 4 bars per stave.
 
 **Marking:** "Mark bars" (click bars), or M / "Mark the bar playing now" while it plays. Marked areas are listed with their chords, a note box, "Hear it" and "Remove".
 

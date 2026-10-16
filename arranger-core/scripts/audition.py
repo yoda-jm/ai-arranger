@@ -32,9 +32,11 @@ SPEC.py is plain Python:
   QUESTIONS = {qid: dict(label, why, default, options=[dict(id, name, text, tag?)])}
   KEPT = ['already settled, with the evidence', ...]           (optional)
   CHART = '...'                                                  (optional) chart text shown under the players
-  def part(clip_id, choice) -> {bar: [(k16, midi, dur16[, (string, fret)]), ...]}
+  def part(clip_id, choice) -> {bar: [(k16, midi, dur16[, (string, fret)[, tech]]), ...]}
       choice maps each question of the clip to an option id. k16 = 16th index 0-15 in the bar; a dur16 running past
       16 ties over the barline (a push). (string, fret) is optional, e.g. ('G', 4); else the lowest fret is used.
+      tech (optional, as written in the tab): 'h' hammer-on, 'p' pull-off, '/' or '\\' slide. The note is then played
+      legato from the previous note: no new attack, the pitch steps (h, p) or glides into the beat (slides).
 
 Output: OUTDIR/<ID>.html (publish it with the Artifact tool and capabilities {"db": {}}), plus the .mid/.m4a files.
 --check STEM prints, per render, the offset between the synthesized notes and the onsets of STEM (e.g. other):
@@ -52,6 +54,11 @@ TEMPLATE = os.path.join(HERE, '..', 'templates', 'audition_page.html')
 SF2S = [os.environ.get('ACAP_SF2'), '/usr/share/sounds/sf2/FluidR3_GM.sf2', '/usr/share/soundfonts/FluidR3_GM.sf2',
         '/usr/share/sounds/sf2/default-GM.sf2', '/usr/share/soundfonts/default.sf2', '/usr/share/sounds/sf2/TimGM6mb.sf2']
 MAX_MB = 15.0   # the Artifact page limit is 16 MB
+BEND_RANGE = 12  # semitones of pitch bend (set with RPN 0), for hammer-ons, pull-offs and slides
+
+
+def bend(semis):
+    return int(max(-8192, min(8191, round(semis / BEND_RANGE * 8192))))
 
 
 def sh(*a):
@@ -79,21 +86,25 @@ def position(midi, tuning, names, given=None):
     return best
 
 
-def tab(barnotes, bar_list, labels, first, tuning, names):
-    """House-style tab: 2 chars per 16th, ¦ at the half bar, chord row from the clip labels ('E E/D#' = two halves)."""
-    rows = {s: names[s] + '|' for s in range(len(tuning))}
-    head = '   '
-    for b in bar_list:
-        cells = [['-'] * 16 for _ in tuning]
-        for n in barnotes.get(b, []):
-            pos = position(n[1], tuning, names, n[3] if len(n) > 3 else None)
-            if pos: cells[pos[0]][n[0]] = str(pos[1])
-        for s in range(len(tuning)):
-            c = cells[s]
-            rows[s] += ''.join(('-' + x)[-2:] for x in c[:8]) + '¦' + ''.join(('-' + x)[-2:] for x in c[8:]) + '-|'
-        ch = labels[b - first][0].split(' ')
-        head += (ch[0].ljust(17) + (ch[1] if len(ch) > 1 else '')).ljust(35)
-    return '\n'.join([head.rstrip()] + [rows[s] for s in reversed(range(len(tuning)))])
+def tab(barnotes, bar_list, labels, first, tuning, names, per=4):
+    """House-style tab: 2 chars per 16th, ¦ at the half bar, chord row from the clip labels ('E E/D#' = two halves),
+    one stave every `per` bars."""
+    staves = []
+    for i in range(0, len(bar_list), per):
+        rows = {s: names[s] + '|' for s in range(len(tuning))}
+        head = '   '
+        for b in bar_list[i:i + per]:
+            cells = [['-'] * 16 for _ in tuning]
+            for n in barnotes.get(b, []):
+                pos = position(n[1], tuning, names, n[3] if len(n) > 3 else None)
+                if pos: cells[pos[0]][n[0]] = (n[4] if len(n) > 4 and n[4] else '') + str(pos[1])
+            for s in range(len(tuning)):
+                c = cells[s]
+                rows[s] += ''.join(('-' + x)[-2:] for x in c[:8]) + '¦' + ''.join(('-' + x)[-2:] for x in c[8:]) + '-|'
+            ch = labels[b - first][0].split(' ')
+            head += (ch[0].ljust(17) + (ch[1] if len(ch) > 1 else '')).ljust(35)
+        staves.append('\n'.join([head.rstrip()] + [rows[s] for s in reversed(range(len(tuning)))]))
+    return '\n\n'.join(staves)
 
 
 def ranges(r):
@@ -179,13 +190,31 @@ def main():
             z = seg[0] if seg else 0.0
             span = (seg[1] - seg[0]) if seg else (t1 - t0)
             pm = pretty_midi.PrettyMIDI(); ins = pretty_midi.Instrument(program=program)
+            # pitch-bend range (RPN 0), for the legato notes; 1 ms apart, as pretty_midi sorts same-time controls by number
+            for i, (cc, v) in enumerate(((101, 0), (100, 0), (6, BEND_RANGE), (38, 0))):
+                ins.control_changes.append(pretty_midi.ControlChange(cc, v, i * 0.001))
+            evs = []
             for b, ns in notes.items():
                 g = grid16(bars, b, TB)
                 for n in ns:
                     k, p, d = n[0], n[1], n[2]
                     e0 = (g[k + d] if k + d <= 16 else grid16(bars, b + TB, TB)[min(k + d - 16, 16)]) - 0.025   # may tie over the barline
-                    ins.notes.append(pretty_midi.Note(velocity=100 if k % 4 == 0 else 88, pitch=p,
-                                                      start=g[k] - t0 - z + shift, end=e0 - t0 - z + shift))
+                    evs.append((g[k] - t0 - z + shift, e0 - t0 - z + shift, p, k, n[4] if len(n) > 4 else None))
+            cur, bent = None, 0.0   # the sounding note, and its bend in semitones
+            for st, en, p, k, tech in sorted(evs, key=lambda e: e[0]):
+                if tech and cur is not None:   # legato: the sounding note goes on, its pitch moves to p
+                    cur.end = max(cur.end, en); to = float(p - cur.pitch)
+                    if tech in 'hp':
+                        ins.pitch_bends.append(pretty_midi.PitchBend(bend(to), st))
+                    else:                      # a slide leaves just before the beat and lands on it
+                        ga = max(cur.start + 0.01, st - 0.05)
+                        for i in range(1, 11):
+                            ins.pitch_bends.append(pretty_midi.PitchBend(bend(bent + (to - bent) * i / 10), ga + (st + 0.01 - ga) * i / 10))
+                    bent = to
+                    continue
+                if bent: ins.pitch_bends.append(pretty_midi.PitchBend(0, st - 0.002)); bent = 0.0
+                cur = pretty_midi.Note(velocity=100 if k % 4 == 0 else 88, pitch=p, start=st, end=en)
+                ins.notes.append(cur)
             pm.instruments.append(ins)
             stem = f"{a.out}/part_{c['id']}_{name}"
             pm.write(stem + '.mid')
@@ -211,7 +240,7 @@ def main():
             mk = {}
             for b in sorted(set().union(*[x.keys() for x in sets])):
                 for k in range(16):
-                    at = [sorted((x[1], x[2]) for x in st.get(b, []) if x[0] == k) for st in sets]
+                    at = [sorted((x[1], x[2], x[4] if len(x) > 4 and x[4] else '') for x in st.get(b, []) if x[0] == k) for st in sets]
                     if any(v != at[0] for v in at): mk.setdefault(str(b), []).append(k)
             data['marks'][c['id']][q] = mk
         segs = None
