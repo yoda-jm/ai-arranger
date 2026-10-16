@@ -1,0 +1,2 @@
+Your per-song work goes here: arrangements/<song>/ (audio, analysis, song.py, arrangement.py, outputs).
+Everything in this folder except this file is ignored by git, because it usually holds copyrighted material.

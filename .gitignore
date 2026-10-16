@@ -1,0 +1,13 @@
+# Per-song work is private (copyrighted audio, lyrics, scores, band details). Only the placeholder is tracked.
+arrangements/*
+!arrangements/.keep
+
+# examples/code-monkey/ is fully tracked (CC BY-NC worked example): no rule below targets it.
+
+# Python, editors, local settings
+.venv/
+__pycache__/
+*.pyc
+*.swp
+*~
+.claude/settings.local.json
