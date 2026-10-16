@@ -32,7 +32,12 @@ The rule that governs everything: **the recording is the truth.** The user's dra
    - slide or pluck, E or F: `glide`;
    - chord quality: `profile`, against a bar whose chord you know.
 7. **Octave mapping**: a guitarist's bass role goes down **exactly one octave** for the bass, every note the same way (his A2 is the bass's E string, 5th fret; his E3 is the A string, 7th fret). Don't move a note to another octave for nicer voice-leading. That changes what the recording says.
-8. **Sections where the player only strums** (a chorus with sustained chords) leave a cluttered low register: there, verify the roots and the harmony per half bar, not a rhythm. If the user has a riff for that section, keep it and say what the player plays under it.
+8. **Picked line or strummed chord?** Decide this before writing a busy line.
+   - If the tables look like chord roots only, the player may be picking a busy pattern: run `partscope picked` over every pass.
+   - But a 16th **strum** also gives a note start on every 16th. Its "lowest note" then jumps between the strings of the chord: C# and G# showed up between the A roots.
+   - Test it: a strum attacks the low and the high strings together on every stroke. A picked line moves on its own, and its notes are not all chord tones.
+   - When it is a strum, write the **bottom notes of the chord** in the strum's pulse (often 8ths). The user's sketch usually names them.
+   - A second recording (another concert, a rehearsal) settles what one night's playing can't. Verify roots and harmony with `profile`.
 9. **A user's sketch may have no rhythm**: one note every 2 characters plus remarks ("double each note before changing", "the 4 in 8ths, crescendo"). Translate it into the grid with the rhythm the recording shows, and keep their frets when the pitches agree.
 10. **Phrase ends and transitions are separate questions**: the last bar of each phrase (players put their fill there: an arpeggio, a walk-up), verse into verse, verse into chorus, chorus into verse, and the ending. Check each on every pass where it occurs.
 
@@ -77,9 +82,54 @@ House style (it came from the users and works well on a tablet):
 | Answering "bar 7" in chart bars when the user counts half-bars | confirm the counting, cite the lyric |
 | Read the user's remark "double each note before changing" as a double at the start of each note, from a dip right after the onset | the repeat was at the **end** of each note (on the & of its last beat), just before the line goes down. Take the remark literally ("before changing"). A dip 60-130 ms after an onset is not evidence of a double (a fading neighbour note, beating or a strum make the same shape) |
 | Read two semitones from the same FFT bin (A2/A#2/B2 at 2048 points) and drew conclusions | check that the columns differ; use `notes16` (FFT 4096) for chromatic bass lines |
+| Wrote a picked chorus as roots in half notes, from the user's 5-note sketch ("completely broken... not enough notes, listen to the guitar") | a guitarist playing the bass role often picks continuously in 16ths. Use `partscope picked` over every pass and write the consensus (the notes in 2+ passes). A short sketch (A E E B A) can be the skeleton of a busy line, not its rhythm |
+| Then the opposite: wrote a strummed chorus as a busy picked line ("still not convinced"). `picked` took the lowest started note per 16th of a 16th strum, so other strings of the chord (C#, G#, B) came out as passing notes | compare low-band (75-190 Hz) and high-band attacks per 16th: a strum hits both together. List all the notes that start in the low register for every pass, on two recordings if possible (8 choruses here). The bottom of the chord (A+E, E+B) in the strum's 8th pulse was the part, and it matched the user's 4-note sketch |
+| Stopped a rising line too early (the user: "a little higher than you think") | follow a moving line until it really stops: it went A# B, C# D#, E, F#. Check the semitone and the note above the last one you found |
 | Missed the figure the player puts at the end of each phrase (a down-and-up arpeggio) although the user's sketch had it, and the "moving up" at the end of the chorus | look at the **last bar of every phrase** and the last bars of every chorus in every pass with `notes16` and `rows --fs 0.6`. The user's sketch often already holds the figure; the player "doesn't always succeed", so one clean pass is enough |
 
-## 8. Reporting
+## 8. A whole band from a record: error families and the rules that prevent them
+A full-band transcription (`examples/code-monkey/`) was scored against the song's official master tracks and against fan transcriptions. The scores: lead 79% of 16ths exact, bass 90% right pitch, drums F 88/90/76 (kick/snare/cymbals), lyrics 49/51 lines. The errors fell into four families. The **method** ones are rules now; follow them.
+
+**1. The tools hear a mix (signal limits).** Work around them; say when you can't.
+- **Four stems merge instruments.** The record had five overdriven guitars; they were written as one electric plus one *acoustic*, because the broadband attacks of distorted 8ths look like strumming.
+  - Count instruments per section using stereo position (a doubled part is a left/right pair) and the 6-stem Demucs model (`htdemucs_6s`, guitar stem).
+  - Ask the user to confirm the line-up before writing parts.
+- **A loud pedal masks short chords.** A palm-muted E ringing through the verse hid B and C#m stabs shorter than half a bar.
+- **Power chords have no third.** Major against minor (A or Am) rests on a faint note, and distortion adds false partials.
+- **Distortion fakes a bass.** An overdriven fifth (A2 + E3) makes a difference tone at A1. Sub-guitar energy alone doesn't prove a bass; look for its own attacks. On this record there was a real bass, and a fan tab had claimed there wasn't.
+
+**2. The method stopped too early or decided too coarsely.** These are rules now.
+- **Label chords at the bass's attacks** (per 8th), not per half bar. When a pedal dominates the chroma, read the chord from the other pitches. In the record, the bass line written by the same session had the riff right (E B A | A C#m B) while the chord symbols said "E | A E".
+- **Name the upper chord from the guitar's notes**, not from the bass plus chroma alone: E over D# (Emaj7/D#) was written B/D#.
+- **After finding one backing voice, look for the next.** The backing stem held a unison double, an octave double *and* a harmony a 5th above. Only the octave was found and written.
+  - Subtract the lead and the octave partials and search what remains.
+  - Report the intervals found, per section.
+- **When sources disagree on a word, count the sung notes.** "Lots" is sung on two notes, so it is "a lot". "To see" has no note for "To", so it is "See". Both errors came from trusting one source (the recogniser, or a single fan comment) over the audio.
+- **Before delivering, cross-check what already exists**: chord charts and tabs (Ultimate Guitar, chords-and-tabs), lyrics wikis, and official multitracks or stems. Many CC artists publish them, and game stems exist for some songs. List the disagreements, then settle each one on the audio.
+  - Here the fan charts would have flagged the verse harmony, both A minors and both lyric errors before delivery.
+
+**3. Notation choices were made silently.** State them, or don't make them.
+- **Blue notes**: the singer sang C, D and G natural where the key has C#, D# and G#. Writing them into the key costs about 10 points of pitch agreement (pitch track 89.8% → written lead 78.9%). Keep a chromatic pitch that recurs across passes; normalise only a one-off.
+- **Slides and scoops** are written as their target note, which is right for a singer. Say so in the README.
+- **Note lengths** end where the singer stops (the voiced end), not at the next syllable. Holding through breaths added 176 wrong 16ths.
+- **Simplifications** (ghost kicks, fill notes, cymbal detail: drum recall 63-83%) go in the README's "not written" list, with the bars.
+
+**4. Checking needs care too.**
+- With master tracks, `groundtruth.py OUT W TRACKS --map V="Lead Vox" BASS=Bass:bass DR=Drums:drums --activity` does the checking:
+  - it aligns them by cross-correlation (here 1.032 s);
+  - it shows who plays when;
+  - it scores each part on its own track: pitch per 16th (torchcrepe; pyin for the bass), drum hits classified by each hit's spectrum.
+- A first drum check used plain frequency bands and counted the snare's low end as kicks, which reported 58% kick recall instead of 79%. Measure the yardstick before trusting the score.
+
+**Before delivering a full-band transcription**:
+1. The line-up confirmed by the user.
+2. Chords re-read at the bass's attacks.
+3. Backing voices searched after the first one.
+4. Lyric conflicts settled by the sung notes.
+5. Published transcriptions and any official stems cross-checked.
+6. Notation choices and simplifications listed in the README.
+
+## 9. Reporting
 - Lead with what was found and what changed.
 - For each claim: the video timestamp, and what is heard per beat.
 - Separate "the pattern" from "slips in one pass".

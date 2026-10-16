@@ -1,12 +1,16 @@
 """Build the bar map W/bars.json from tracked beats/downbeats (beat_this, fallback librosa).
 
-usage: barmap.py W [--meter 4/4] [--anchor TIME=BAR] [--fix BAR=TIME,BAR=TIME | --fix file.json]
+usage: barmap.py W [--meter 4/4] [--anchor TIME=BAR] [--fix BAR=TIME,BAR=TIME | --fix file.json] [--grid]
                    [--tracker beat_this|librosa] [--end TIME] [--retrack]
 
   --anchor 4.52=1   the downbeat nearest 4.52 s becomes bar 1 (earlier bars get 0, -1, ...). Default: first downbeat = 1.
   --fix 53=93.80,54=95.90   force bar starts (rubato / tempo changes the tracker got wrong); beats inside the fixed
                     bars are re-spread evenly and snapped to tracked beats within 60 ms.
   --meter 3/4 | 6/8 (6/8 = 2 dotted-quarter beats per bar, 6 sixteenths per beat).
+  --grid            the record follows a click: fit ONE beat period to the tracked beats (least squares on the beats
+                    that sit on the grid, so 8th-level beats in a drumless intro and spurious downbeats drop out) and
+                    lay bars every N beats from the --anchor downbeat (required) to the end. Prints the residual: a
+                    few ms = a click track; over ~30 ms the tempo moves and the grid is the wrong tool.
 Prints the tempo per bar run and every irregular bar (wrong number of beats = tracker problem or real meter change).
 """
 import sys, os, argparse, json
@@ -18,6 +22,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("W"); ap.add_argument("--meter", default="4/4"); ap.add_argument("--anchor")
 ap.add_argument("--fix"); ap.add_argument("--tracker", default="beat_this"); ap.add_argument("--end", type=float)
 ap.add_argument("--retrack", action="store_true"); ap.add_argument("--device", default=None)
+ap.add_argument("--grid", action="store_true")
 a = ap.parse_args()
 W = a.W
 num, den = map(int, a.meter.split("/"))
@@ -93,6 +98,34 @@ for j, s in enumerate(starts):
         a0, a1 = beat_t(s), beat_t(e); bt = [a0 + (a1 - a0) * q / N for q in range(N)]
     bars.append(dict(t=beat_t(s), beats=bt, nbeats=e - s))
 end = a.end or (beat_t(starts[-1] + N))
+
+if a.grid:   # ---- one constant tempo (a click track)
+    if not a.anchor: raise SystemExit("--grid needs --anchor TIME=BAR (TIME = a downbeat you trust)")
+    ta = float(a.anchor.split("=")[0])
+    d = np.diff(beats); p = float(np.median(d[(d > 0.25) & (d < 2.0)]))
+    # index each beat from the previous kept one (a whole number of beats away), so a first period that is a
+    # little off does not drift; beats between grid beats (8th-level tracking) are skipped
+    i0 = int(np.argmin(abs(beats - ta))); idx = np.full(len(beats), np.nan); idx[i0] = 0
+    for rng, sgn in ((range(i0 + 1, len(beats)), 1), (range(i0 - 1, -1, -1), -1)):
+        last = i0
+        for i in rng:
+            r = abs(beats[i] - beats[last]) / p; k = round(r)
+            if k >= 1 and abs(r - k) < 0.2: idx[i] = idx[last] + sgn * k; last = i
+    for _ in range(3):                          # fit, drop the beats off the line, refit
+        ok = ~np.isnan(idx)
+        p, t0 = np.polyfit(idx[ok], beats[ok], 1)
+        idx[ok & (abs(beats - t0 - np.nan_to_num(idx) * p) > 0.15 * p)] = np.nan
+    ok = ~np.isnan(idx)
+    res = beats[ok] - (t0 + idx[ok] * p)
+    print(f"grid: beat {p:.5f} s = {60 / p:.3f} bpm, fitted on {ok.sum()}/{len(beats)} beats, "
+          f"residual rms {1000 * res.std():.0f} ms, max {1000 * abs(res).max():.0f} ms"
+          + ("  <- over 30 ms: the tempo moves, prefer --fix" if res.std() > 0.03 else ""))
+    t_first = t0 - np.floor((t0 + 0.05) / (N * p)) * N * p        # earliest bar start at or after ~0 s
+    end = a.end or float(beats[-1] + p)
+    bars = []; tb = t_first
+    while tb < end - 0.5 * p:
+        bars.append(dict(t=float(tb), beats=[float(tb + q * p) for q in range(N)], nbeats=N)); tb += N * p
+    pre = []; pickup = 0; T["tracker"] += " + fitted grid"
 
 # ---- numbering
 if a.anchor:

@@ -82,16 +82,15 @@ Install the skills by linking the three folders into `.claude/skills/` of your p
 
 The recordings, scores and lyrics of other people's songs are not included in this repository. Your own per-song work goes in `arrangements/`, which git ignores.
 
-The one exception is the worked example, [`examples/code-monkey/`](examples/code-monkey/README.md). It is "Code Monkey" by Jonathan Coulton ([jonathancoulton.com](https://www.jonathancoulton.com)), which its author released under [CC BY-NC 3.0](https://creativecommons.org/licenses/by-nc/3.0/). Everything derived from it in this repository (transcriptions, arrangements, scores) is shared under the same licence, for non-commercial use only. It will show every kind of job on one source:
-- the transcription and a lead sheet;
-- a single part checked against the recording;
+The one exception is the worked example, [`examples/code-monkey/`](examples/code-monkey/README.md). It is "Code Monkey" by Jonathan Coulton ([jonathancoulton.com](https://www.jonathancoulton.com)), which its author released under [CC BY-NC 3.0](https://creativecommons.org/licenses/by-nc/3.0/). Everything derived from it in this repository (transcriptions, arrangements, scores) is shared under the same licence, for non-commercial use only. It shows every kind of job on one source. The first one is done: a full-band transcription (lead sheet, drum, bass and guitar sheets, full score), [measured against the song's official master tracks](examples/code-monkey/evaluation/README.md). The lead vocal scores 79% of notes exact, the bass 90% and the drums 88-90%, and its errors are explained by cause. Still to come:
+- a single part written as a text tab for a musician;
 - an a cappella version;
 - band versions in other styles.
 
 ## Status
 
 Working and used by a real band; the APIs of the scripts may still change. Roadmap:
-- the worked example on "Code Monkey" (the recording is in; the versions are to do);
+- the worked example on "Code Monkey": transcription and evaluation done; the a cappella and band versions to do;
 - a generic band profile, so the band skill isn't tied to one lineup;
 - a video tool that reads fret positions from close-up footage;
 - more styles.

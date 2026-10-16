@@ -1,0 +1,46 @@
+1. LYRICS: transcription (lyrics.txt) against the JoCo wiki (lyrics_reference.txt)
+   ...code monkey like you [transcription: lots] [wiki: a lot]
+   ...just keep on working [transcription: to] [wiki: -]
+
+master tracks start +1.033 s into the mix
+
+2. VERSE RIFF: Electric Guitar 2, top pitch classes per 8th (the record) | the transcription's chords
+   bar 41: B E F# | E C B | E B F# | B D# A# | B F# A# | B A# C | B A# C# | A E B   || E
+   bar 42: A E B | G E G# | B A E | B A# G# | A# B F | A# B A | A# A B | C B A#   || A E
+   bar 43: E B D# | E F D# | E F D | F# B A# | B F# A# | B C A# | G B F# | A E A#   || E
+   bar 44: A E C# | F F# E | A# G A | C# G# D# | C# G# C | B F# C# | B F# C# | B C D#   || A B
+
+3. PRE-CHORUS AND CHORUS: Electric Guitar 4 per half bar | the transcription's chords
+   bar 17: A A# G# | A A# E   || A
+   bar 18: B C A# | B F# C   || B
+   bar 19: G# D# A | G# D# G   || G#/C
+   bar 20: G# C# C | B F# C   || C#m B
+   bar 21: A E G# | A G# E   || A
+   bar 22: A E G# | A E A#   || A
+   bar 23: B F# C | B F# C   || B
+   bar 24: B F# C | B F# C   || B
+   bar 25: E B D# | E D# F   || E
+   bar 26: D# E B | E D# B   || B/D#
+   bar 27: C# E G# | E G# C#   || C#m
+   bar 28: E B F | B E F   || E/B B
+
+4. END OF CHORUS 2: C (A minor) against C# (A major) in guitars 2+4+5, per half bar | transcription
+   bar 73: C 0.91 / C# 1.25 -> major | C 1.11 / C# 1.46 -> major   || D A
+   bar 74: C 0.59 / C# 1.08 -> major | C 1.42 / C# 1.66 -> major   || A
+   bar 75: C 1.44 / C# 1.25 -> minor | C 1.07 / C# 1.05 -> minor   || A
+   bar 76: C 0.91 / C# 1.11 -> major | C 1.07 / C# 0.96 -> minor   || D E
+   bar 77: C 1.05 / C# 1.23 -> major | C 1.27 / C# 1.53 -> major   || D
+   bar 78: C 0.75 / C# 1.65 -> major | C 1.22 / C# 1.42 -> major   || A
+   bar 79: C 1.26 / C# 1.07 -> minor | C 1.13 / C# 1.05 -> minor   || A
+   bar 80: C 0.94 / C# 1.10 -> major | C 0.86 / C# 0.87 -> major   || A
+
+5. HARMONY VOCAL: interval above the lead, per 16th where both sing (the transcription has no harmony part)
+    +7 semitones (5th): 42%
+    +4 semitones (major 3rd): 19%
+    +5 semitones (4th): 15%
+    +3 semitones (minor 3rd): 11%
+    +8 semitones (minor 6th): 5%
+    +6 semitones (): 3%
+   +10 semitones (): 1%
+    +9 semitones (major 6th): 1%
+   bars: 24-33, 36-40, 64-73, 76-79, 108-117, 120-124 (sounding in 44 bars)

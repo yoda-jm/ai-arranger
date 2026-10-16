@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Code Monkey Transcription Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (staff paper), wider figures and tables scroll in their own frames; corrections in red pen */
+:root {
+  --paper: #f6f7f9; --sheet: #ffffff; --ink: #172030; --muted: #586377; --rule: #d7dce5; --staff: #e8ecf2;
+  --blue: #2442a3; --red: #be2a2f; --green: #2d7a4c; --amber: #a86d12;
+  --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0f131b; --sheet: #161b25; --ink: #e5e9f0; --muted: #9ba5b6; --rule: #2b3342; --staff: #1d2431;
+  --blue: #93a8ff; --red: #ff7a7a; --green: #6ccb95; --amber: #e3b45e; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #0f131b; --sheet: #161b25; --ink: #e5e9f0; --muted: #9ba5b6; --rule: #2b3342; --staff: #1d2431;
+  --blue: #93a8ff; --red: #ff7a7a; --green: #6ccb95; --amber: #e3b45e; color-scheme: dark }
+body { background: var(--paper); color: var(--ink); font: 17px/1.55 var(--f-body); }
+.wrap { max-width: 920px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 44px; }
+.col { max-width: 68ch; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.12; }
+h1 { font-size: clamp(2.1rem, 5vw, 3.2rem); font-weight: 800; font-stretch: 85%; letter-spacing: -0.01em; }
+h2 { font-size: 1.55rem; font-weight: 750; font-stretch: 90%; padding-bottom: 8px; border-bottom: 2px solid var(--ink); }
+h3 { font-size: 1.1rem; font-weight: 700; }
+p { margin: 0; } section { display: grid; gap: 16px; } a { color: var(--blue); }
+.eyebrow { font: 500 0.78rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 1.15rem; color: var(--ink); }
+.muted { color: var(--muted); } .small { font-size: 0.9rem; }
+code, .mono { font-family: var(--f-mono); font-size: 0.88em; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+.fact { background: var(--sheet); padding: 12px 14px; display: grid; gap: 2px; min-width: 0; }
+.fact b { font: 700 1.45rem/1.1 var(--f-display); font-variant-numeric: tabular-nums; }
+.fact span { font-size: 0.86rem; color: var(--muted); }
+.frame { overflow-x: auto; border: 1px solid var(--rule); background: var(--sheet); }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--rule); }
+th { font: 600 0.78rem/1.3 var(--f-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); background: var(--staff); }
+td.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+.ok { color: var(--green); font-weight: 600; } .bad { color: var(--red); font-weight: 600; } .half { color: var(--amber); font-weight: 600; }
+.mark { display: inline-block; font: 600 0.72rem/1 var(--f-mono); padding: 3px 6px; border: 1px solid currentColor; border-radius: 3px; white-space: nowrap; }
+.sheets { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+figure { margin: 0; display: grid; gap: 6px; min-width: 0; }
+figure img { width: 100%; border: 1px solid var(--rule); background: #fff; }
+figcaption { font-size: 0.85rem; color: var(--muted); }
+.grid { font: 0.86rem/1.45 var(--f-mono); white-space: pre; padding: 12px 14px; margin: 0; }
+.grid .r { color: var(--red); } .grid .g { color: var(--green); }
+.lim { display: grid; gap: 14px; }
+.lim article { border-left: 3px solid var(--red); padding: 2px 0 2px 14px; display: grid; gap: 6px; }
+.lim article.ours { border-left-color: var(--amber); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.85rem; color: var(--muted); align-items: center; }
+.sw { display: inline-block; width: 12px; height: 12px; vertical-align: -1px; margin-right: 5px; }
+audio { width: 100%; }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.pair > div { display: grid; gap: 6px; min-width: 0; }
+ul, ol { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+</style>
+<style>:root{color-scheme:light} body{margin:0} img{max-width:100%}</style>
+</head>
+<body>
+<div class="wrap">
+<header style="display:grid;gap:14px">
+  <span class="eyebrow">ai-arranger · proof of concept · 16 October 2026</span>
+  <h1>Code Monkey, transcribed by an AI agent and checked against the master tracks</h1>
+  <p class="lede col">Claude Opus 5.5, driving the <a href="https://github.com/yoda-jm/ai-arranger">ai-arranger</a> skills in Claude Code, turned the mixed recording of Jonathan Coulton's "Code Monkey" into a full band score with a lead sheet and drum, bass and guitar sheets, in under an hour. We then measured the result against the song's official unmixed tracks and against fan transcriptions found online. The sheets below are shown exactly as the agent produced them; nothing was corrected afterwards. The errors are the point of this page.</p>
+  <div class="facts" role="list">
+    <div class="fact" role="listitem"><b>79%</b><span>lead vocal, notes exact per 16th vs the isolated vocal</span></div>
+    <div class="fact" role="listitem"><b>90%</b><span>bass, right pitch per 16th vs the isolated bass</span></div>
+    <div class="fact" role="listitem"><b>88 · 90 · 76</b><span>drums F-score %: kick · snare · cymbals</span></div>
+    <div class="fact" role="listitem"><b>49 / 51</b><span>lyric lines exact vs the JoCo wiki</span></div>
+    <div class="fact" role="listitem"><b>58 min</b><span>from request to finished sheets</span></div>
+    <div class="fact" role="listitem"><b>$19.00</b><span>model cost: song choice + transcription</span></div>
+  </div>
+  <p class="small muted">"Code Monkey", words and music by Jonathan Coulton (<a href="https://www.jonathancoulton.com">jonathancoulton.com</a>), released under <a href="https://creativecommons.org/licenses/by-nc/3.0/">CC BY-NC 3.0</a>. Everything derived from it here is shared under the same licence, for non-commercial use.</p>
+</header>
+
+<section>
+  <h2>What was produced</h2>
+  <p class="col">Five sheets, each as PDF and MusicXML (in <code>sheets/</code>; click a page to open its PDF). The band sheets use repeat barlines, 1st and 2nd endings, one-bar repeat signs and multi-measure rests; a playback check confirms each short sheet plays exactly the same notes as the written-out score. Measure numbers in the written-out score are the recording's bar numbers, so every bar can be checked against the audio.</p>
+  <div class="sheets">
+    <figure><a href="../../sheets/code_monkey_lead_sheet.pdf"><img src="img/lead-1.png" alt="Lead sheet, page 1: melody, lyrics and chord symbols for verse 1, pre-chorus and the first chorus" loading="lazy"></a><figcaption><b>Lead sheet</b> · 3 pages · melody, words, chords</figcaption></figure>
+    <figure><a href="../../sheets/code_monkey_full_score.pdf"><img src="img/full-02.png" alt="Full score, page 2: lead vocal, backing vocals, electric guitar with tab, acoustic guitar with tab, bass with tab, drums" loading="lazy"></a><figcaption><b>Full score</b> · 16 pages · 6 parts, guitars and bass with TAB</figcaption></figure>
+    <figure><a href="../../sheets/code_monkey_drums.pdf"><img src="img/drums-1.png" alt="Drum sheet, page 1: multi-measure rest, verse groove with repeat signs, pre-chorus and chorus grooves" loading="lazy"></a><figcaption><b>Drums</b> · 2 pages · repeats, endings, % signs</figcaption></figure>
+    <figure><a href="../../sheets/code_monkey_bass.pdf"><img src="img/bass-1.png" alt="Bass sheet, page 1: notation with tablature, 15 bars rest then the pre-chorus and chorus lines" loading="lazy"></a><figcaption><b>Bass</b> · 3 pages · with tablature</figcaption></figure>
+    <figure><a href="../../sheets/code_monkey_guitar.pdf"><img src="img/guitar-2.png" alt="Guitar sheet, page 2: electric guitar palm-muted roots and acoustic guitar strums, both with tablature" loading="lazy"></a><figcaption><b>Guitars</b> · 8 pages · two staves with TAB</figcaption></figure>
+  </div>
+  <p class="small muted">Also produced: the written-out versions, MIDI, 13 audio mock-ups (General MIDI), automatic checks (<code>qa.txt</code>), text groove cards and a chords-and-words sheet. Two tools were added to the skills on the way: <code>compact.py</code> (short scores with repeats, checked against the written-out playback) and <code>barmap.py --grid</code> (exact bar grid for records made on a click).</p>
+</section>
+
+<section>
+  <h2>Listen: the record and the transcription</h2>
+  <p class="col">The first chorus, 15 seconds. The mock-up plays the transcribed parts with General MIDI sounds, so it shows the notes, rhythms and arrangement, not the sound of the record.</p>
+  <div class="pair">
+    <div><h3>The record</h3><audio controls preload="none" src="audio/original_chorus.m4a"></audio></div>
+    <div><h3>The transcription, rendered</h3><audio controls preload="none" src="audio/render_chorus.m4a"></audio></div>
+  </div>
+</section>
+
+<section>
+  <h2>How it was made</h2>
+  <p class="col">One request in plain words: "produce a lead sheet of Code Monkey, a drum sheet, guitar sheet if required and bass sheet, then a MusicXML nicely written with all the instruments, sing and backing vocals". The agent cannot hear; it reads the recording through measurements: separated stems, pitch tracks, spectra, onset grids and piano-roll images.</p>
+  <div class="frame"><table>
+    <thead><tr><th>Step</th><th>Tools</th><th>Time</th></tr></thead>
+    <tbody>
+      <tr><td>Choose a well-known Coulton song he owns outright, check its licence, fetch the official 2008 release</td><td>web search, the author's FAQ, archive.org</td><td class="num">~10 min</td></tr>
+      <tr><td>Analyse: stems, lead/backing split, beats, pitch, words, drum grid</td><td>Demucs, Mel-RoFormer, beat_this, torchcrepe, Whisper (GPU: GTX 1660 SUPER)</td><td class="num">9:01</td></tr>
+      <tr><td>Find that the beat tracker invented bars, refit a constant 160.01 bpm grid</td><td>regression on the beats (9 ms residual)</td><td class="num">~5 min</td></tr>
+      <tr><td>Read the form, chords, bass, drums, guitars, lead and backing vocals</td><td><code>look.py</code>, <code>partscope.py</code>, spectra per drum hit</td><td class="num">~23 min</td></tr>
+      <tr><td>Write the transcription as code (<code>song.py</code>, <code>score.py</code>), build, check, render</td><td>MuseScore 4.7, fluidsynth, <code>qa.py</code></td><td class="num">~12 min</td></tr>
+      <tr><td>Short sheets with repeats, after the person asked for them</td><td><code>compact.py</code> (new)</td><td class="num">~10 min</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>What it cost</h2>
+  <p class="col">Claude Opus 5.5 at Anthropic's list prices: input $4, 1-hour cache write $8, cache read $0.20 and output $20 per million tokens (<a href="https://platform.claude.com/docs/en/about-claude/pricing">pricing page</a>). Token counts come from the session transcript.</p>
+  <div class="frame"><table>
+    <thead><tr><th>Phase</th><th>Requests</th><th>Output</th><th>Cache read</th><th>Cache write</th><th>Cost</th></tr></thead>
+    <tbody>
+      <tr><td>Choose the song, licence, download</td><td class="num">32</td><td class="num">34k</td><td class="num">6.7M</td><td class="num">67k</td><td class="num">$2.55</td></tr>
+      <tr><td>Transcription, all sheets, short sheets</td><td class="num">107</td><td class="num">208k</td><td class="num">48.1M</td><td class="num">333k</td><td class="num">$16.45</td></tr>
+      <tr><td>This evaluation and report</td><td class="num">63</td><td class="num">116k</td><td class="num">44.1M</td><td class="num">175k</td><td class="num">$12.54</td></tr>
+    </tbody>
+  </table></div>
+  <p class="col small muted">Cache reads are 58% of the transcription's cost: each request re-read about 450k tokens of a long session that had already done other work. A fresh session would read far less. Prices exclude the GPU and electricity.</p>
+</section>
+
+<section>
+  <h2>Checked against the master tracks</h2>
+  <p class="col">The song's official unmixed tracks were published with the <em>JoCo Looks Back</em> release under the same licence (<a href="https://archive.org/details/JonathanCoultonJoCoLooksBackSourceTracks">archive.org</a>, uploaded by Coulton's team): lead, double, octave and harmony vocals, five electric guitars, bass and drums. Their readme says "160 BPM", the tempo the agent measured. Aligned to the mix (offset 1.032 s), each isolated track was scored against the matching part of the transcription, 16th by 16th.</p>
+  <div class="frame"><table>
+    <thead><tr><th>Part</th><th>Score</th><th>Right</th><th>Wrong</th></tr></thead>
+    <tbody>
+      <tr><td>Lead vocal</td><td class="num">78.9% exact</td><td>No octave errors; rhythm and form; the pitch read from the separated stem was right 89.8% of the time</td><td>Slides written as their target, blue notes (C, D, G natural) bent to the E-major scale, notes held through the singer's breaths</td></tr>
+      <tr><td>Bass</td><td class="num">89.6% pitch</td><td>Entry on beat 4a of bar 16; pre-chorus 99%, interludes 99%</td><td>Verses 76%: the chromatic C put in the wrong bar, an E pickup that isn't played; chorus 90%: E pushes where the record jumps an octave</td></tr>
+      <tr><td>Backing vocals</td><td class="num">84.2% exact</td><td>The octave-up double, in exactly the right bars</td><td><span class="bad">Missed a whole harmony line</span> (mostly a 5th above) in every chorus, and the unison double in the verses</td></tr>
+      <tr><td>Drums: kick</td><td class="num">P 99 · R 79</td><td>Kick on 1 and 3 in verses; 1, 1&amp;, 3 in choruses</td><td>Ghost kicks on the "e" of 2 and 4 left out</td></tr>
+      <tr><td>Drums: snare</td><td class="num">P 98 · R 83</td><td>Backbeat, stops, fills on beat 4</td><td>Pickup and fill notes simplified</td></tr>
+      <tr><td>Drums: cymbals</td><td class="num">P 97 · R 63</td><td>Quarter-note hats in verses, 8ths elsewhere</td><td>Fewer cymbal hits written than played</td></tr>
+      <tr><td>Guitars</td><td class="num">—</td><td>The palm-muted E (D string, 2nd fret) found and tabbed exactly</td><td><span class="bad">Five electric guitars written as one electric plus one acoustic</span>; the verse guitar carried into choruses; guitars 3, 4 and 5 not written</td></tr>
+      <tr><td>Chords</td><td class="num">—</td><td>Pre-chorus A B G#/B# C#m B A A B; key, form, 125 bars</td><td>Verse riff written E | A E instead of E B A | A C#m B; Emaj7/D# called B/D#; two A minor chords called A major</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Who plays when: the master tracks against the transcription</h3>
+  <div class="legend"><span><span class="sw" style="background:var(--blue)"></span>plays</span><span><span class="sw" style="background:var(--staff);outline:1px solid var(--rule)"></span>quiet</span><span>Rows above the line: official tracks. Below: the transcription's staves. Bars 1–124.</span></div>
+  <div class="frame"><svg id="map" role="img" aria-label="Activity per bar of the 11 official tracks and the 6 transcribed staves"></svg></div>
+  <p class="col small muted">Read across: the transcription's single electric guitar plays everywhere, while the real palm-muted guitar plays only in verses; guitars 4 and 5 (a doubled pair for pre-choruses and choruses), guitar 3 (verses 2 and 3) and the harmony vocal have no counterpart; and the "acoustic guitar" row has no counterpart at all.</p>
+
+  <h3>The verse riff, in 8ths</h3>
+  <div class="frame"><pre class="grid">count            1   &amp;   2   &amp;   3   &amp;   4   &amp;  |  1   &amp;   2   &amp;   3   &amp;   4   &amp;
+guitar (record)  E   .   .   B   B   .   .   A   |  A   .   .   C#m C#m B   B   .
+chords (mine)    <span class="r">E               A</span>               |  <span class="r">A               B</span>
+bass (record)    E   E   F   B   B   B   B   A   |  A   A   .   C#  C#  C   B   B
+bass (mine)      E   E   E   B   B   B   B   A   |  A   A   A   C#  C#  C#  B   B</pre></div>
+  <p class="col small muted">Bars 43 and 44. The bass line the agent wrote follows the riff; its chord symbols don't, because they were read per half bar from a spectrum where the palm-muted E rings through everything.</p>
+</section>
+
+<section>
+  <h2>Checked against fan transcriptions</h2>
+  <p class="col">Four chord charts, two guitar tabs and a bass tab on <a href="https://www.chords-and-tabs.net/song/name/jonathan-coulton-code-monkey-3">chords-and-tabs.net</a>, and the lyrics on the JoCo wiki (<a href="https://web.archive.org/web/20111125052402/http://www.jonathancoulton.com/wiki/Code_Monkey/Lyrics">2011 archive</a>). The fans worked by ear, so they catch what the measurements missed, and the measurements catch what they missed.</p>
+  <div class="frame"><table>
+    <thead><tr><th>Point</th><th>Fans</th><th>Agent</th><th>Master tracks say</th></tr></thead>
+    <tbody>
+      <tr><td>Tempo, meter</td><td>~160, common time</td><td>160.01 bpm, 4/4</td><td><span class="ok">both right</span> (readme: 160 BPM)</td></tr>
+      <tr><td>Verse harmony</td><td>E B/E A/E on every line</td><td>E | A/E E</td><td><span class="ok">fans right</span></td></tr>
+      <tr><td>"Code Monkey like…" (bar 26)</td><td>Emaj7</td><td>B/D#</td><td><span class="ok">fans right</span>: E over a D# bass</td></tr>
+      <tr><td>End of chorus 2</td><td>D A Am E</td><td>D A A A E</td><td><span class="ok">fans right</span>: the A minor is there twice</td></tr>
+      <tr><td>Instruments</td><td>"two guitars, both overdriven"</td><td>one electric, one acoustic</td><td>five electric guitars; <span class="half">fans closer</span></td></tr>
+      <tr><td>Bass</td><td>"Jonathan doesn't actually use a bass" (invented line)</td><td>bass from the pre-chorus</td><td><span class="ok">agent right</span>: a bass track, entering at bar 16</td></tr>
+      <tr><td>"login page"</td><td>G# (3 charts), E (1 chart)</td><td>G#/B#</td><td><span class="ok">agent and most fans right</span></td></tr>
+      <tr><td>Lyrics, chorus 2</td><td>"like you a lot"</td><td>"like you lots"</td><td><span class="ok">fans right</span>: two sung notes, two syllables</td></tr>
+      <tr><td>Lyrics, verse 3</td><td>"See your soft pretty face"</td><td>"To see your soft…"</td><td><span class="ok">fans right</span>: the extra word came from one fan comment</td></tr>
+      <tr><td>Bar-by-bar form, melody, drum parts</td><td>not written</td><td>complete, 125 bars</td><td><span class="ok">agent only</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>Why it went wrong: four families of error</h2>
+  <p class="col">Every error found above fits one of four causes. The first is a limit of the tools: they hear a mixed recording. The second and third are the agent's method, and those are fixable. As of this report they are rules in the skill. The fourth is about checking itself.</p>
+  <div class="lim col">
+    <article><h3>1 · The tools hear a mix</h3><p>Four stems hold everything: five overdriven guitars land in one stem, so the agent counted guitars from mixed spectra and read the broadband attacks of distorted 8th notes as an acoustic guitar strumming. A palm-muted E rings through every verse bar and hides chord stabs shorter than half a bar. Power chords have no third, so A against A minor rests on a faint note, and distortion adds false partials; it can even fake a bass, because an overdriven fifth makes a difference tone an octave below its root. Partly fixable: a 6-stem model with a guitar stem, stereo position (guitars 4 and 5 are a left/right pair), and asking the person to confirm the line-up.</p></article>
+    <article><h3>2 · The method stopped too early or decided too coarsely</h3><p>Chords were labelled per half bar, from the loudest pitches, while the bass line in the same score already had the right riff. The search for backing voices stopped at the first one found (the octave double), so a harmony a fifth above went unwritten. Lyric conflicts were settled by trusting one source instead of counting the sung notes. And nothing was cross-checked before delivery, although four fan charts would have flagged the verse harmony, both A minors and both lyric errors.</p></article>
+    <article><h3>3 · Notation choices were made silently</h3><p>Blue notes were bent into the key, slides written as their target, notes held through breaths, ghost notes and fills left out. Each is a defensible choice for a sheet a musician reads, and together they cost about 10 points of pitch agreement and 20 to 35 points of drum recall. The error is that the sheets don't say so.</p></article>
+    <article class="ours"><h3>4 · Checking needs the same care</h3><p>The first drum check used plain frequency bands on the master track and counted the snare's low end as kicks, reporting 58% kick recall instead of 79%. Even with master tracks, the yardstick has to be measured. Beyond that, the agent cannot listen: everything was decided from numbers and pictures, and the General MIDI mock-up can't show tone or feel.</p></article>
+  </div>
+
+  <div class="frame"><table>
+    <thead><tr><th>Error</th><th>Family</th><th>Now in the skill</th></tr></thead>
+    <tbody>
+      <tr><td>Acoustic guitar that doesn't exist; guitars 3, 4, 5 missing; verse guitar carried into choruses</td><td>1 · mix</td><td>Confirm the line-up with the person; count instruments by stereo position and the 6-stem model</td></tr>
+      <tr><td>Verse riff written E | A E (B and C#m missed)</td><td>1 · mix, 2 · method</td><td>Label chords at the bass's attacks, per 8th; read past a pedal note</td></tr>
+      <tr><td>Emaj7/D# written B/D#</td><td>2 · method</td><td>Name the upper chord from the guitar's notes, not from bass plus chroma</td></tr>
+      <tr><td>Two A minor chords written A major</td><td>1 · mix</td><td>Flag major/minor calls on power chords; cross-check published charts</td></tr>
+      <tr><td>Harmony vocal missed</td><td>2 · method</td><td>After the first backing voice, subtract it and search for the next</td></tr>
+      <tr><td>"lots" for "a lot", "To see" for "See"</td><td>2 · method</td><td>When sources disagree, the number of sung notes decides</td></tr>
+      <tr><td>Blue notes, slides, held breaths, dropped ghost notes</td><td>3 · notation</td><td>Keep chromatic notes that recur; end notes where the voice stops; list every simplification in the README</td></tr>
+      <tr><td>Kick recall first measured at 58%</td><td>4 · checking</td><td><code>groundtruth.py</code>: aligns master tracks, classifies drum hits by spectrum</td></tr>
+      <tr><td>Bars invented by the beat tracker</td><td>1 · mix</td><td><code>barmap.py --grid</code> for records made on a click</td></tr>
+    </tbody>
+  </table></div>
+  <p class="col small muted">The rules are in <code>arranger-core/references/transcription.md</code> §8, with a checklist to run before delivering a full-band transcription: line-up confirmed, chords at the bass's attacks, backing voices searched past the first, lyric conflicts settled by the sung notes, published transcriptions and official stems cross-checked, notation choices listed.</p>
+</section>
+
+<section>
+  <h2>Next</h2>
+  <ul class="col">
+    <li>The master tracks are in <code>evaluation/master-tracks/</code>: every change to the tools can be scored with <code>groundtruth.py</code>.</li>
+    <li>Run the next transcription with the new rules and score it with <code>groundtruth.py</code>, to see how much the method fixes recover.</li>
+    <li>Then the remaining planned versions of the song: an a cappella arrangement and a band re-genre.</li>
+  </ul>
+  <p class="small muted col">Sources: <a href="https://www.jonathancoulton.com/faq/">Jonathan Coulton FAQ (licence)</a> · <a href="https://archive.org/details/jonathan-coulton-code-monkey">the recording on archive.org</a> · <a href="https://archive.org/details/JonathanCoultonJoCoLooksBackSourceTracks">JoCo Looks Back source tracks</a> · <a href="https://platform.claude.com/docs/en/about-claude/pricing">Claude pricing</a> · <a href="https://www.chords-and-tabs.net/song/name/jonathan-coulton-code-monkey-3">fan tabs and charts</a> · <a href="https://web.archive.org/web/20111125052402/http://www.jonathancoulton.com/wiki/Code_Monkey/Lyrics">JoCo wiki lyrics (2011)</a> · <a href="https://github.com/yoda-jm/ai-arranger">ai-arranger on GitHub</a></p>
+</section>
+</div>
+<script>
+(function () {
+  var D = {"rows":[{"group":"official","name":"Lead vocal","bars":[2,2,2,2,2,2,2,1,2,2,2,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,1,0,0,0,0,0,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,2]},{"group":"official","name":"Unison double","bars":[0,0,0,0,0,0,0,0,2,2,2,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,2,0,0,0,0,0,0,0,0,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,2]},{"group":"official","name":"Octave double","bars":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,2]},{"group":"official","name":"Harmony","bars":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,2]},{"group":"official","name":"Guitar 1 (P.M. E)","bars":[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"group":"official","name":"Guitar 2 (rhythm)","bars":[0,0,0,0,0,0,0,0,2,1,2,2,2,1,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,1,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,1,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]},{"group":"official","name":"Guitar 3","bars":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"group":"official","name":"Guitar 4","bars":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]},{"group":"official","name":"Guitar 5","bars":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]},{"group":"official","name":"Bass","bars":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1]},{"group":"official","name":"Drums","bars":[0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0]},{"group":"mine","name":"Lead vocal","bars":[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,2]},{"group":"mine","name":"Backing (octave up)","bars":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,2,2]},{"group":"mine","name":"Electric guitar","bars":[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0]},{"group":"mine","name":"Acoustic guitar","bars":[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]},{"group":"mine","name":"Bass","bars":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]},{"group":"mine","name":"Drums","bars":[0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0]}],"sections":[["V1",1],["Pre",16],["Ch1",24],["V2",41],["Pre",56],["Ch2",64],["Int",80],["V3",85],["Pre",100],["Ch3",108],["Out",122]],"nbars":124};
+  var svg = document.getElementById("map"); if (!svg) return;
+  var NS = "http://www.w3.org/2000/svg", L = 150, C = 6, R = 13, G = 2, T = 22, gap = 14;
+  var rows = D.rows, n = D.nbars, off = rows.filter(function (r) { return r.group === "official"; }).length;
+  var W = L + n * C + 8, H = T + rows.length * (R + G) + gap + 6;
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.setAttribute("width", W); svg.setAttribute("height", H);
+  function el(tag, at, txt) { var e = document.createElementNS(NS, tag); for (var k in at) e.setAttribute(k, at[k]); if (txt) e.textContent = txt; svg.appendChild(e); return e; }
+  D.sections.forEach(function (s, i) {
+    var x = L + (s[1] - 1) * C, nx = i + 1 < D.sections.length ? L + (D.sections[i + 1][1] - 1) * C : L + n * C;
+    el("line", { x1: x, x2: x, y1: 12, y2: H, stroke: "var(--rule)", "stroke-width": 1 });
+    if (nx - x > 16) el("text", { x: x + 2, y: 14, "font-size": 10, fill: "var(--muted)", "font-family": "var(--f-mono)" }, s[0]);
+  });
+  rows.forEach(function (r, i) {
+    var y = T + i * (R + G) + (i >= off ? gap : 0);
+    el("text", { x: L - 8, y: y + R - 3, "font-size": 11, "text-anchor": "end", fill: "var(--ink)", "font-family": "var(--f-body)" }, r.name);
+    r.bars.forEach(function (v, b) {
+      el("rect", { x: L + b * C, y: y, width: C - 1, height: R,
+        fill: v === 2 ? (r.group === "official" ? "var(--blue)" : "var(--ink)") : v === 1 ? "var(--muted)" : "var(--staff)",
+        "fill-opacity": v === 1 ? 0.55 : 1 });
+    });
+  });
+  var ys = T + off * (R + G) + gap / 2 - 1;
+  el("line", { x1: 0, x2: W, y1: ys, y2: ys, stroke: "var(--red)", "stroke-width": 1.5, "stroke-dasharray": "4 3" });
+  el("text", { x: 4, y: T - 6, "font-size": 10, fill: "var(--blue)", "font-family": "var(--f-mono)" }, "MASTER TRACKS");
+  el("text", { x: 4, y: ys + 12, "font-size": 10, fill: "var(--ink)", "font-family": "var(--f-mono)" }, "TRANSCRIPTION");
+})();
+</script>
+</body>
+</html>

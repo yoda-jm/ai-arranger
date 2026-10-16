@@ -46,6 +46,8 @@ $PY $C/analyze.py song.mp3 $A/work --lyrics lyrics.txt [--anchor 4.52=1] [--mete
 
   How to read each column, and how accurate it is: [references/analysis.md](references/analysis.md).
 - **Fix the bar map first.** Bar 1 = the first downbeat of the first sung phrase (`--anchor TIME=1`). Pin rubato bars with `barmap.py $A/work --fix 53=93.8,...`, then `analyze.py ... --force drums,report`.
+  - **A record made on a click** (steady tempo runs, but odd bars where the drums stop): `barmap.py $A/work --grid --anchor TIME=1` fits one tempo to the beats and lays an exact grid. A residual of a few ms confirms the click.
+  - The beat tracker counts 8ths in drumless intros and inserts 6-beat bars at fills; on a click record those are tracker errors, not meter changes.
 - **Write down the form**: a section table with recording bars, keys and which sections repeat (from levels + `≈rep` + words). Songs often run on one loop; say so, it makes reharmonising easy.
 - No lyrics file? Whisper's words are used.
   - Get a second opinion section by section: `$PY $C/words.py $A/work 12-19 35-43 [--stem vocals] [--language en]`. Short clips on the lead stem fix most mishearings.
@@ -60,6 +62,13 @@ $PY $C/analyze.py song.mp3 $A/work --lyrics lyrics.txt [--anchor 4.52=1] [--mete
 - Notate the intended music: the 8th/16th grid, chord-tone pitches rather than scoops, one note per syllable.
 - You may write `song.py` in the arrangement's key. Then set `rec_shift` (semitones from the record's key) in the arrangement, so renders and QA compare in the record's key.
 - **Verify early.** A lead-only build is enough for `qa.py` to score the melody against the recorded singer. Aim for 70% or more same-pitch-class 16ths; investigate bars below about 50%.
+- **A whole band** (every part from one record): follow the error families and the checklist in [references/transcription.md §8](references/transcription.md):
+  - confirm the line-up with the user (four stems merge instruments);
+  - label chords at the bass's attacks;
+  - look for more backing voices after the first one;
+  - settle lyric conflicts by counting the sung notes;
+  - cross-check published transcriptions and any official stems before delivering;
+  - list notation choices (blue notes, slides, simplifications) in the README.
 
 ## 2b. Transcribe one part for a musician (repiquage)
 Full method, chart conventions and the mistakes already made: [references/transcription.md](references/transcription.md).
@@ -87,6 +96,10 @@ $PY $C/build.py $A/arrangement.py $A/out --work $A/work --png [--lib <style skil
 $PY $C/qa.py $A/out && $PY $C/render.py $A/out
 ```
 - `build.py` writes musicxml, mscz (chord symbols muted, rhythm slashes silent), pdf, mid, `events.json` and `png/page-NN.png`. Python errors point at the bar. Tall scores: `--scaling 4.2 --staff-distance 40`.
+- **Short score**: users read scores with repeats more easily. After the written-out build (kept for audio and QA), run `compact.py OUT/x.musicxml ROADMAP.py OUT/short/x [--multirest]`.
+  - It gives repeat barlines, 1st/2nd endings, D.C./D.S. al Coda, stacked verses, one-bar repeat signs and multi-measure rests.
+  - It refuses merges whose passes differ, and checks that the playback equals the written-out build. Details: [references/notation.md](references/notation.md).
+  - Single-player sheets: build the same arrangement file with only that player's parts, e.g. an environment switch read by the file (`examples/code-monkey/score.py`, `CM_SHEET`).
 - **Tablature**: a part listed in `engine.TAB` (open strings, max fret) gets a TAB staff under its notation staff. `fretboard.py` picks the string and fret of every note along the shortest path for the hand, and shows strums as full chord shapes (the top four strings on an up-stroke). The TAB staff is silent in MuseScore so the part does not play twice. Its notation staff uses an octave clef (treble 8vb, bass 8vb) instead of a transposition, because MuseScore recomputes frets from the written pitch of a transposed part.
 - **Part names choose the MuseScore instrument** on import, before the instrument sound: a part called "Bass" becomes a bass *singer*. Name a bass guitar "Electric Bass".
 - `qa.py` checks:
@@ -111,12 +124,17 @@ $PY $C/qa.py $A/out && $PY $C/render.py $A/out
 - **Never decide "is this note played" from octave-summed salience.** A strummed A3 then reads as a bass A2. Use plain per-pitch bins.
 - **Barlines come from the music**: roots on downbeats, the most notes on beats. A draft had every barline three 16ths late because it took the start of a repeating figure as beat 1.
 - **When the user doubts a note, re-test with a finer tool** rather than defending the first reading. Their ear was right every time.
+- **Arrangement files**:
+  - Sections print in the order they are created: create them in bar order (a loop over "all pre-choruses" puts them together).
+  - A tie is written on the pitch: `E3~:4`, not `E3:4~`.
+  - A note tied over from the previous section is an onset for `parse_line`: give it the syllable `_` (the build re-ties it).
 
 ## Files
 - `scripts/`:
   - analysis: `analyze.py` · `barmap.py` · `report.py` · `look.py` · `words.py` (lyrics second opinion) · `acap.py` (shared helpers, `Bars`, `Layout`)
   - part transcription: `partscope.py` (lowest / stack / rows / onsets / repluck / glide / profile)
-  - arranging: `engine.py` · `build.py` · `render.py` · `qa.py` · `fretboard.py` (guitar chord shapes, string/fret placement for TAB staves)
+  - checking against master tracks: `groundtruth.py` (aligns official multitracks to the mix, shows who plays when, scores each part: pitch per 16th, drum hits by spectrum)
+  - arranging: `engine.py` · `build.py` · `render.py` · `qa.py` · `fretboard.py` (guitar chord shapes, string/fret placement for TAB staves) · `compact.py` (the short score: repeats, endings, D.C./Coda, stacked verses, % signs, multi-measure rests; checked against the written-out MIDI)
   - install: `setup.sh` · `check_env.py`
 - `references/`: install · analysis · transcription (one part → tab/chart) · troubastack (send charts and tabs to a band's TroubaStack server) · engine · notation · style-research (how to find what is core to a new style or lineup, with a worked log)
 - `templates/song.py`

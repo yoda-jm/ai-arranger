@@ -2,7 +2,15 @@
 arrangements/*
 !arrangements/.keep
 
-# examples/code-monkey/ is fully tracked (CC BY-NC worked example): no rule below targets it.
+# examples/code-monkey/: git keeps what a musician uses (sheets/ as PDF + MusicXML + one .m4a render), the sources and
+# the evaluation. The AI-made byproducts (stems, analysis, written-out builds, MIDI, renders, MuseScore masters) are
+# listed in examples/code-monkey/GENERATED.md; regenerate.sh makes them again.
+examples/code-monkey/work/
+examples/code-monkey/out/
+examples/code-monkey/out-sheets/
+examples/code-monkey/work-analyze.log
+examples/code-monkey/sheets/*.mscz
+examples/code-monkey/sheets/*.mid
 
 # Python, editors, local settings
 .venv/
