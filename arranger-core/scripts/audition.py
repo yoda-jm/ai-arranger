@@ -175,7 +175,7 @@ def main():
         layers = {q: ranges(r) for q, r in c['layers'].items()} if c.get('layers') else None
         defaults = {q: Q[q].get('default', Q[q]['options'][0]['id']) for q in qs}
         data['tabs'][c['id']] = {}
-        scale = {}
+        pending = []
 
         def render(notes, name, seg=None):   # seg = (start, end) in clip seconds: render only that span
             z = seg[0] if seg else 0.0
@@ -194,10 +194,8 @@ def main():
             sh('fluidsynth', '-ni', '-g', '0.9', '-r', '44100', '-F', stem + '.wav', sf2, stem + '.mid')
             y, sr = sf.read(stem + '.wav'); y = y.mean(1) if y.ndim > 1 else y
             L = int(span * sr); y = np.pad(y, (0, max(0, L - len(y))))[:L]
-            if not layers or 'k' not in scale: scale['k'] = 0.89 / (np.abs(y).max() + 1e-9)   # layers share the base layer's gain
-            sf.write(stem + '.wav', np.clip(y * scale['k'], -1, 1), sr)
-            aac(['-i', stem + '.wav'], stem + '.m4a', 1, pk)
-            audio_ids.append((os.path.basename(stem), stem + '.m4a'))
+            sf.write(stem + '.wav', y, sr)
+            pending.append((stem, float(np.abs(y).max())))   # encoded after the clip, with one gain for all its renders
             if a.check and ins.notes:
                 import librosa
                 if a.check not in check_y:
@@ -240,6 +238,14 @@ def main():
                 render(notes, key.replace('|', '_'))
                 if c.get('tab_bars'):
                     data['tabs'][c['id']][key] = tab(notes, c['tab_bars'], c['labels'], first, tuning, names)
+        # one gain for every render of the clip, from their common peak: options keep their relative level, and a
+        # silent base layer (all bars in questions) can't blow the gain up into clipping
+        gain = 0.89 / max([pk_ for _, pk_ in pending] + [1e-6])
+        for stem, _ in pending:
+            y, sr = sf.read(stem + '.wav')
+            sf.write(stem + '.wav', np.clip(y * gain, -1, 1), sr)
+            aac(['-i', stem + '.wav'], stem + '.m4a', 1, pk)
+            audio_ids.append((os.path.basename(stem), stem + '.m4a'))
         data['clips'].append({'id': c['id'], 'title': c['title'], 'src': c.get('src', ''), 'why': c.get('why', ''),
                               'questions': qs, 'layers': {q: [list(x) for x in r] for q, r in layers.items()} if layers else None,
                               'segs': segs, 'first': first, 'dur': round(duration(band), 3),
