@@ -108,6 +108,8 @@ Labels: one `(chord, section)` per bar. A space splits the bar into two chords (
 ## 5. The recording's bar map
 - The notes are placed on `bars.json`, so they follow the live tempo, its pushes and its slowing down.
 - **A rubato intro the tracker got wrong.** Measure where the pattern's notes really fall. In one case they fell half a bar after the tracker's bars, with one 7-beat bar absorbing the shift. Re-place those bars with `BAR_FIX = {3: 8.27, 4: 11.24, 5: 14.16, 6: 17.3}`.
+- **Check every downbeat against the chord changes before a whole-song page.** A beat tracker can stay locked to the drums at the 16th level and still miscount: an 8th-level tracker that squeezes 6 eighths into one 4-beat bar (its beat interval jumps from 0.46 to 0.71 s for 4 beats) slips every later barline by a beat. In one song three such slips put verse 1 half a bar off, and a drum-phase check alone could not see it. Look at the 2 strongest low pitch classes of the band on each beat: the chart's chord should start on beat 1 in every bar. A guitarist who pushes the changes by an 8th can fool a chord fit; the drum pattern of each bar, compared with a typical bar, settles it.
+- **A rubato intro played by one instrument** (no drums): place each bar on that player's root attack (low-register onsets + chroma), and hold one root per bar.
 - **The last bar** ends at `bars.json`'s `end`. `audition.py` adds a closing bar for it, so a final note can be held to the end.
 - A clip that starts at bar 1 is clamped to 0 s. Before that fix, a negative start shifted the whole part by the pre-roll.
 
